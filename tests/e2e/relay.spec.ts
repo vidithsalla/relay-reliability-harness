@@ -5,23 +5,53 @@ test.beforeEach(() => {
   execFileSync("npm", ["run", "db:reset"], { stdio: "inherit" });
 });
 
+test("homepage explains Relay and routes to scenarios", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
+  await expect(page.getByText("AI agents can call enterprise APIs.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "The problem in 15 seconds" })).toBeVisible();
+  await expect(page.getByText("Relay treats the system of record")).toBeVisible();
+  await page.getByRole("link", { name: "Explore failure scenarios" }).click();
+  await expect(page).toHaveURL(/\/scenarios$/);
+  await expect(page.getByRole("heading", { name: "Failure Scenarios" })).toBeVisible();
+});
+
+test("primary navigation keeps home and scenarios separate", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Scenarios" }).click();
+  await expect(page).toHaveURL(/\/scenarios$/);
+  await expect(page.getByRole("heading", { name: "Failure Scenarios" })).toBeVisible();
+  await page.getByRole("link", { name: "Relay" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
+});
+
+test("happy path scenario launches from scenarios", async ({ page }) => {
+  await page.goto("/scenarios");
+  await scenarioCard(page, "Happy path").getByRole("button", { name: "Run scenario" }).click();
+  await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
+  await expect(page.getByText("Completed").first()).toBeVisible();
+  await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
+});
+
 test("timeout-after-write shows transport failure but confirmed business success", async ({ page }) => {
   const errors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") errors.push(message.text());
   });
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Timeout after write").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
+  await expect(page.getByText("The planner proposed intent.")).toBeVisible();
   await page.reload();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
   expect(errors).toEqual([]);
 });
 
 test("timeout-before-write proves absence before retrying", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Timeout before write").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Retried after absence was proven")).toBeVisible();
@@ -30,7 +60,7 @@ test("timeout-before-write proves absence before retrying", async ({ page }) => 
 });
 
 test("partial completion retries only the missing inspection", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Partial completion").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Set reserve.*1/ })).toBeVisible();
@@ -38,14 +68,14 @@ test("partial completion retries only the missing inspection", async ({ page }) 
 });
 
 test("stale version scenario shows replan blocker", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Stale state").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("Replan Required").first()).toBeVisible();
   await expect(page.getByText("SCHEDULE_INSPECTION -> Version Conflict")).toBeVisible();
 });
 
 test("duplicate request is a no-op idempotent replay", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Duplicate request").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("No Op Duplicate").first()).toBeVisible();
   await expect(page.getByText("No-op duplicate: prior effect reused")).toBeVisible();
@@ -53,7 +83,7 @@ test("duplicate request is a no-op idempotent replay", async ({ page }) => {
 });
 
 test("retry exhaustion stops in manual investigation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Retry exhaustion").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("Retry limit reached: manual investigation")).toBeVisible();
   await expect(page.getByText("Manual Investigation Required").first()).toBeVisible();
@@ -61,7 +91,7 @@ test("retry exhaustion stops in manual investigation", async ({ page }) => {
 });
 
 test("ambiguous state requires manual investigation without blind retry", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "Ambiguous outcome").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("No blind retry: manual investigation")).toBeVisible();
   await expect(page.getByText("Authoritative read-back failed").first()).toBeVisible();
@@ -69,7 +99,7 @@ test("ambiguous state requires manual investigation without blind retry", async 
 });
 
 test("high-risk settlement review approves and persists settlement", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "High-risk settlement").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("Waiting Review").first()).toBeVisible();
   await page.goto("/review");
@@ -79,7 +109,7 @@ test("high-risk settlement review approves and persists settlement", async ({ pa
 });
 
 test("reviewer rejection fails closed without an adapter attempt", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/scenarios");
   await scenarioCard(page, "High-risk settlement").getByRole("button", { name: "Run scenario" }).click();
   await expect(page.getByText("Waiting Review").first()).toBeVisible();
   await page.goto("/review");

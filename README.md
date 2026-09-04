@@ -73,6 +73,7 @@ E12_ILLEGAL_TRANSITION                     PASS
 
 ## Screenshots
 
+- [Homepage](docs/screenshots/00-homepage.png)
 - [Scenario launcher](docs/screenshots/01-scenario-launcher.png)
 - [Timeout after write](docs/screenshots/02-timeout-after-write.png)
 - [Timeout before write](docs/screenshots/03-timeout-before-write.png)
@@ -112,12 +113,13 @@ npm run verify:db
 
 ## 90-Second Demo
 
-1. Open `/` and run **Timeout after write**.
-2. Open the run detail and show: action attempted, API timed out, read-back shows reserve changed, reconciliation is `CONFIRMED_APPLIED`, and no retry occurred.
-3. Run **Partial completion** and show reserve has one attempt while inspection has two.
-4. Run **Stale state** and show expected-version conflict leading to `REPLAN_REQUIRED`.
-5. Run **High-risk settlement**, approve it in `/review`, and show revalidation before settlement execution.
-6. Open `/evals` and report only the actual persisted eval count.
+1. Open `/` and explain the reserve timeout example.
+2. Open `/scenarios` and run **Timeout after write**.
+3. Open the run detail and show: action attempted, API timed out, read-back shows reserve changed, reconciliation is `CONFIRMED_APPLIED`, and no retry occurred.
+4. Run **Partial completion** and show reserve has one attempt while inspection has two.
+5. Run **Stale state** and show expected-version conflict leading to `REPLAN_REQUIRED`.
+6. Run **High-risk settlement**, approve it in `/review`, and show revalidation before settlement execution.
+7. Open `/evals` and report only the actual persisted eval count.
 
 ## Limitations
 

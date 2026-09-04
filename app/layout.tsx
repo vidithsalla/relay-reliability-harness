@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Relay
             </Link>
             <nav className="nav" aria-label="Primary">
-              <Link href="/">Scenarios</Link>
+              <Link href="/scenarios">Scenarios</Link>
               <Link href="/runs">Runs</Link>
               <Link href="/review">Review</Link>
               <Link href="/evals">Evals</Link>

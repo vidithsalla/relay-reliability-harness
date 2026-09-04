@@ -2,11 +2,13 @@
 
 0-12 seconds:
 
-> I built the layer between an AI agent deciding to take an enterprise action and us being able to trust that the action actually happened correctly.
+Open `/`.
+
+> Relay sits between a planner deciding to take an enterprise action and us being able to trust that the action actually happened correctly.
 
 12-30 seconds:
 
-Run **Timeout after write**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
+Open `/scenarios` and run **Timeout after write**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
 
 30-50 seconds:
 
@@ -24,4 +26,4 @@ Run **High-risk settlement**. Open `/review`, approve, and show server revalidat
 
 Open `/evals` and cite the actual persisted result.
 
-> The model proposes intent. The system of record determines truth.
+> The planner proposes intent. The system of record determines truth.

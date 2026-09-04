@@ -93,7 +93,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
           <div>
             <h2>Intent vs Observed Proof</h2>
             <p>
-              The model proposed intent. Relay attempted the enterprise action, read the source of record, reconciled the
+              The planner proposed intent. Relay attempted the enterprise action, read the source of record, reconciled the
               mismatch, and selected a safe recovery path.
             </p>
           </div>

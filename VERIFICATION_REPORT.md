@@ -1,6 +1,6 @@
 # VERIFICATION_REPORT
 
-Date/time: 2026-09-04 10:44:35 EDT
+Date/time: 2026-09-04 16:08:43 EDT
 
 Environment:
 
@@ -21,14 +21,18 @@ Environment:
 | `npm run test:integration` | PASS, 2 files / 8 tests |
 | `npm run eval` | PASS, 12/12 cases |
 | `npm run build` | PASS |
-| `npm run test:e2e` | PASS, 10 browser tests |
-| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `9d5b9279-5d7d-4d54-a661-33af81b1fba9` completed |
-| `npm run screenshots` | PASS, regenerated 10 screenshots |
+| `npm run test:e2e` | PASS, 13 browser tests |
+| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `6385965a-e302-40cb-84b1-f00b714e10b4` completed |
+| `npm run screenshots` | PASS, regenerated 11 screenshots |
 
 ## Browser Verification
 
 Manually exercised at `http://localhost:3012`:
 
+- homepage: first viewport explains Relay, the timeout-after-write centerpiece, the concrete reserve `$5,000 -> $8,400` example, and routes visitors to `/scenarios`;
+- responsive homepage smoke: mobile width has no horizontal overflow and nav/CTA touch targets are at least 44px high;
+- scenario launcher: moved to `/scenarios`, shows all 9 existing scenarios, and launches the existing runtime paths without semantic changes;
+- navigation: Relay logo routes to `/`; Scenarios routes to `/scenarios`; Runs, Review, Evals, and About remain unchanged;
 - timeout-after-write: intended reserve write, `SET_RESERVE -> Timeout`, action-specific read-back at version 18, `CONFIRMED_APPLIED`, and no duplicate retry are visible in the first proof panel;
 - timeout-before-write: first read-back shows reserve still `$5,000`, reconciliation is `CONFIRMED_NOT_APPLIED`, then only the safe action retries;
 - partial completion: reserve remains completed while inspection retries selectively;
@@ -42,6 +46,7 @@ Manually exercised at `http://localhost:3012`:
 
 Screenshots were captured under `docs/screenshots/`:
 
+- `00-homepage.png`
 - `01-scenario-launcher.png`
 - `02-timeout-after-write.png`
 - `03-timeout-before-write.png`

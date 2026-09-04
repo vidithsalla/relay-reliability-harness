@@ -32,6 +32,7 @@
 - Impeccable UI skill is requested only if available; it is not present in this environment’s skill list, so the final UI pass will be performed manually against the same UX criteria.
 - The local Node version is newer than the minimum Node 20 requirement; use it unless a dependency forces a narrower runtime.
 - Docker Desktop did not expose a usable daemon socket in this environment. `npm run db:up` therefore tries Docker Compose first, then falls back to a real local PostgreSQL 16.13 data directory under `.relay-pgdata` when Docker is unavailable. This preserves Postgres-backed verification without using an in-memory substitute.
+- The onboarding request requires “AI/model” language on the explanatory homepage, but the run detail must stay planner-neutral. Homepage copy therefore explains the general AI boundary, while run detail says “The planner proposed intent.”
 
 ## Final Product-Quality Pass
 
@@ -44,3 +45,14 @@
 - Fixed a review UX bug found during manual browser audit: reviewer rejection now shows rejected human action, zero adapter attempts, and failed-closed guidance rather than the prior pending-review recovery text.
 - Expanded Playwright e2e coverage from 5 to 10 tests to include timeout-before-write, duplicate no-op, retry exhaustion, ambiguous manual investigation, and reviewer rejection.
 - Regenerated screenshots for ten demo-relevant screens and disabled the Next dev indicator so local screenshots remain product-focused.
+
+## Onboarding and First-Impression Pass
+
+- Added a dedicated explanatory homepage at `/` focused on the timeout-after-write proof: intended reserve change, API timeout, authoritative observed state, reconciliation, and no duplicate retry.
+- Moved the existing scenario launcher to `/scenarios` without changing scenario definitions, runtime state machines, database schema, eval expectations, recovery semantics, or run-detail behavior.
+- Updated primary navigation so the Relay logo returns to `/` and the Scenarios link opens `/scenarios`.
+- Added homepage sections for the 15-second problem, Relay lifecycle, broader failure modes, product definition/disclaimer, AI/Relay/system-of-record trust boundary, and “Break it yourself” scenario entry.
+- Updated run-detail copy from “The model proposed intent.” to “The planner proposed intent.” while leaving the homepage’s general AI framing intact.
+- Added Playwright coverage for homepage comprehension, home-to-scenarios CTA routing, nav separation, scenario launch from `/scenarios`, and the planner-neutral run-detail phrase.
+- Regenerated screenshots for 11 demo-relevant screens, including the new homepage as `docs/screenshots/00-homepage.png`.
+- Manually checked the homepage at desktop and mobile widths; mobile has no horizontal overflow and interactive targets meet the 44px baseline.

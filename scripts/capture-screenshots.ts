@@ -104,7 +104,8 @@ async function main() {
     await waitForServer();
     const browser = await chromium.launch();
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-    await screenshot(page, "/", "01-scenario-launcher.png");
+    await screenshot(page, "/", "00-homepage.png");
+    await screenshot(page, "/scenarios", "01-scenario-launcher.png");
     await screenshot(page, `/runs/${timeout.runId}`, "02-timeout-after-write.png");
     await screenshot(page, `/runs/${timeoutBefore.runId}`, "03-timeout-before-write.png");
     await screenshot(page, `/runs/${partial.runId}`, "04-partial-completion.png");
