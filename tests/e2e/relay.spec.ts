@@ -5,13 +5,22 @@ test.beforeEach(() => {
   execFileSync("npm", ["run", "db:reset"], { stdio: "inherit" });
 });
 
-test("homepage explains Relay and routes to scenarios", async ({ page }) => {
+test("homepage explains Relay and launches the strongest demo", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
-  await expect(page.getByText("AI agents can call enterprise APIs.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "The problem in 15 seconds" })).toBeVisible();
-  await expect(page.getByText("Relay treats the system of record")).toBeVisible();
-  await page.getByRole("link", { name: "Explore failure scenarios" }).click();
+  await expect(page.getByText("AI agents can act on enterprise systems.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Why Relay exists" })).toBeVisible();
+  await expect(page.getByText("A timeout does not necessarily mean the action failed.")).toBeVisible();
+  await expect(page.getByText("Applied - Do not retry")).toBeVisible();
+  await page.getByRole("button", { name: "See it fail" }).click();
+  await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
+  await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
+  await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
+});
+
+test("homepage secondary CTA routes to scenarios", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("link", { name: "Explore all scenarios" }).first().click();
   await expect(page).toHaveURL(/\/scenarios$/);
   await expect(page.getByRole("heading", { name: "Failure Scenarios" })).toBeVisible();
 });

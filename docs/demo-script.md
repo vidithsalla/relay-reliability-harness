@@ -4,11 +4,11 @@
 
 Open `/`.
 
-> Relay sits between a planner deciding to take an enterprise action and us being able to trust that the action actually happened correctly.
+> AI agents can act on enterprise systems. Relay verifies what actually happened before anything retries.
 
 12-30 seconds:
 
-Open `/scenarios` and run **Timeout after write**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
+Click **See it fail**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
 
 30-50 seconds:
 

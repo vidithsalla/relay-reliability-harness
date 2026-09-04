@@ -1,6 +1,6 @@
 # VERIFICATION_REPORT
 
-Date/time: 2026-09-04 16:08:43 EDT
+Date/time: 2026-09-04 19:43:52 EDT
 
 Environment:
 
@@ -21,15 +21,16 @@ Environment:
 | `npm run test:integration` | PASS, 2 files / 8 tests |
 | `npm run eval` | PASS, 12/12 cases |
 | `npm run build` | PASS |
-| `npm run test:e2e` | PASS, 13 browser tests |
-| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `6385965a-e302-40cb-84b1-f00b714e10b4` completed |
+| `npm run test:e2e` | PASS, 14 browser tests |
+| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `d97bfd91-081f-4cbe-90c9-b252e912f589` completed |
 | `npm run screenshots` | PASS, regenerated 11 screenshots |
 
 ## Browser Verification
 
 Manually exercised at `http://localhost:3012`:
 
-- homepage: first viewport explains Relay, the timeout-after-write centerpiece, the concrete reserve `$5,000 -> $8,400` example, and routes visitors to `/scenarios`;
+- homepage: simplified to four sections that answer problem, concrete example, general rule, and where to try it;
+- direct demo CTA: **See it fail** launches the existing Timeout After Write scenario and lands on a `/runs/...` trace with timeout, `CONFIRMED_APPLIED`, and no-retry evidence;
 - responsive homepage smoke: mobile width has no horizontal overflow and nav/CTA touch targets are at least 44px high;
 - scenario launcher: moved to `/scenarios`, shows all 9 existing scenarios, and launches the existing runtime paths without semantic changes;
 - navigation: Relay logo routes to `/`; Scenarios routes to `/scenarios`; Runs, Review, Evals, and About remain unchanged;
