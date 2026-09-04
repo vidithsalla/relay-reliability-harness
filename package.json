@@ -13,6 +13,7 @@
     "test:e2e": "playwright test",
     "eval": "node --import tsx scripts/run-evals.ts",
     "verify:db": "node --import tsx scripts/verify-db.ts",
+    "screenshots": "node --import tsx scripts/capture-screenshots.ts",
     "db:up": "node --import tsx scripts/db-up.ts",
     "db:migrate": "node --import tsx scripts/db-migrate.ts",
     "db:seed": "node --import tsx scripts/db-seed.ts",

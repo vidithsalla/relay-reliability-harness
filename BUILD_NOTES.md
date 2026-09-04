@@ -32,3 +32,15 @@
 - Impeccable UI skill is requested only if available; it is not present in this environment’s skill list, so the final UI pass will be performed manually against the same UX criteria.
 - The local Node version is newer than the minimum Node 20 requirement; use it unless a dependency forces a narrower runtime.
 - Docker Desktop did not expose a usable daemon socket in this environment. `npm run db:up` therefore tries Docker Compose first, then falls back to a real local PostgreSQL 16.13 data directory under `.relay-pgdata` when Docker is unavailable. This preserves Postgres-backed verification without using an in-memory substitute.
+
+## Final Product-Quality Pass
+
+- Reworked run detail around an explicit proof chain: intended state, API result, observed state, reconciled state, and recovery decision.
+- Added operator-facing decision guidance for completed, review, replan, retry-exhausted manual investigation, ambiguous manual investigation, and reviewer-rejected fail-closed runs.
+- Added a human-action pipeline stage and categorized audit timeline rows so request, plan, policy, attempt, fault, adapter, read-back, reconciliation, recovery, review, and final events are visually distinct.
+- Replaced raw fault-profile IDs on the launcher/detail header with operator-readable failure labels while preserving deterministic evidence and stored semantics.
+- Exposed duplicate request and retry exhaustion in the launcher using existing coordinator/eval behavior, not new runtime semantics.
+- Fixed a UI correctness bug found during manual browser audit: failed post-attempt read-back snapshots now render as failed read-back evidence instead of assuming a claim aggregate exists.
+- Fixed a review UX bug found during manual browser audit: reviewer rejection now shows rejected human action, zero adapter attempts, and failed-closed guidance rather than the prior pending-review recovery text.
+- Expanded Playwright e2e coverage from 5 to 10 tests to include timeout-before-write, duplicate no-op, retry exhaustion, ambiguous manual investigation, and reviewer rejection.
+- Regenerated screenshots for ten demo-relevant screens and disabled the Next dev indicator so local screenshots remain product-focused.

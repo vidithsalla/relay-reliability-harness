@@ -1,5 +1,6 @@
 import { runScenarioAction } from "@/app/actions";
 import { scenarios } from "@/lib/fixtures/scenarios";
+import { titleize } from "@/lib/ui/format";
 
 export const dynamic = "force-dynamic";
 
@@ -18,16 +19,16 @@ export default function HomePage() {
         {scenarios.map((scenario) => (
           <article className="card scenario-card" key={scenario.id}>
             <div>
-              <span className="badge">{scenario.category}</span>
+              <span className="badge">{titleize(scenario.category)}</span>
               <h2>{scenario.title}</h2>
               <p>{scenario.requestText}</p>
             </div>
             <div className="fact">
-              <strong>Injected failure</strong>
-              <span>{scenario.faultProfileId}</span>
+              <strong>Failure being exercised</strong>
+              <span>{failureLabel(scenario.faultProfileId, scenario.runMode)}</span>
             </div>
             <div className="fact">
-              <strong>Expected reliability behavior</strong>
+              <strong>Reliability behavior to verify</strong>
               <span>{scenario.expectedBehavior}</span>
             </div>
             <form action={runScenarioAction}>
@@ -41,4 +42,22 @@ export default function HomePage() {
       </section>
     </main>
   );
+}
+
+function failureLabel(faultProfileId: string, runMode?: string) {
+  if (runMode === "duplicate") return "Repeated delivery of the same logical request";
+  if (faultProfileId === "none") return "No injected adapter fault";
+  if (faultProfileId === "timeout-after-write-reserve") return "Timeout after the reserve write is committed";
+  if (faultProfileId === "timeout-before-write-reserve") return "Timeout before the reserve write reaches the system";
+  if (faultProfileId === "partial-reserve-success-inspection-timeout-before") {
+    return "Reserve commits, then inspection times out before write";
+  }
+  if (faultProfileId === "stale-version-before-second-action") {
+    return "External version change before the second action";
+  }
+  if (faultProfileId === "ambiguous-write-and-readback-timeout") {
+    return "Write timeout followed by failed authoritative read-back";
+  }
+  if (faultProfileId === "retry-exhaustion-inspection") return "Repeated before-write failures until the retry limit is reached";
+  return titleize(faultProfileId);
 }

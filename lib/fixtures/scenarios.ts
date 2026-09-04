@@ -6,6 +6,7 @@ export type Scenario = {
   faultProfileId: string;
   expectedBehavior: string;
   category: "core" | "review" | "manual" | "conflict";
+  runMode?: "normal" | "duplicate";
 };
 
 export const scenarios: Scenario[] = [
@@ -67,6 +68,26 @@ export const scenarios: Scenario[] = [
     faultProfileId: "none",
     expectedBehavior: "Settlement waits for reviewer approval and then revalidates before execution.",
     category: "review"
+  },
+  {
+    id: "duplicate-request",
+    title: "Duplicate request",
+    claimId: "CLM-1042",
+    requestText:
+      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
+    faultProfileId: "none",
+    expectedBehavior: "The second delivery uses the same semantic idempotency namespace and becomes a no-op duplicate.",
+    category: "core",
+    runMode: "duplicate"
+  },
+  {
+    id: "retry-exhaustion",
+    title: "Retry exhaustion",
+    claimId: "CLM-1042",
+    requestText: "Schedule another inspection.",
+    faultProfileId: "retry-exhaustion-inspection",
+    expectedBehavior: "Repeated before-write failures stop at the retry limit and require manual investigation.",
+    category: "manual"
   },
   {
     id: "ambiguous-outcome",

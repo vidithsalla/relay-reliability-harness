@@ -12,6 +12,27 @@ export async function runScenarioAction(formData: FormData) {
   const scenario = scenarios.find((item) => item.id === scenarioId);
   if (!scenario) throw new Error("Unknown scenario.");
   await resetClaimFixtures([scenario.claimId]);
+  if (scenario.runMode === "duplicate") {
+    await createAndStartRun({
+      claimId: scenario.claimId,
+      requestText: scenario.requestText,
+      plannerMode: "deterministic",
+      faultProfileId: scenario.faultProfileId,
+      scenarioId: `${scenario.id}-first-delivery`,
+      actorId: "operator",
+      logicalRunNamespace: scenario.id
+    });
+    const duplicate = await createAndStartRun({
+      claimId: scenario.claimId,
+      requestText: scenario.requestText,
+      plannerMode: "deterministic",
+      faultProfileId: scenario.faultProfileId,
+      scenarioId: scenario.id,
+      actorId: "operator",
+      logicalRunNamespace: scenario.id
+    });
+    redirect(`/runs/${duplicate.runId}`);
+  }
   const result = await createAndStartRun({
     claimId: scenario.claimId,
     requestText: scenario.requestText,

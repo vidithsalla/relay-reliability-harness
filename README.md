@@ -75,10 +75,14 @@ E12_ILLEGAL_TRANSITION                     PASS
 
 - [Scenario launcher](docs/screenshots/01-scenario-launcher.png)
 - [Timeout after write](docs/screenshots/02-timeout-after-write.png)
-- [Partial completion](docs/screenshots/03-partial-completion.png)
-- [Stale version](docs/screenshots/04-stale-version.png)
-- [Review queue](docs/screenshots/05-review-queue.png)
-- [Eval results](docs/screenshots/06-eval-results.png)
+- [Timeout before write](docs/screenshots/03-timeout-before-write.png)
+- [Partial completion](docs/screenshots/04-partial-completion.png)
+- [Stale version](docs/screenshots/05-stale-version.png)
+- [Duplicate request](docs/screenshots/06-duplicate-request.png)
+- [Retry exhaustion](docs/screenshots/07-retry-exhaustion.png)
+- [Ambiguous investigation](docs/screenshots/08-ambiguous-investigation.png)
+- [Review queue](docs/screenshots/09-review-queue.png)
+- [Eval results](docs/screenshots/10-eval-results.png)
 
 ## Setup
 

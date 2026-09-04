@@ -11,3 +11,4 @@ tsconfig.tsbuildinfo
 npm-debug.log*
 docker-data/
 .relay-pgdata/
+.gstack/

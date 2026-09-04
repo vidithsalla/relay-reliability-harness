@@ -29,7 +29,15 @@ export default async function ReviewPage() {
             </div>
             <div className="fact">
               <strong>Policy reason</strong>
-              <span>{review.reason_code}</span>
+              <span>{reviewReason(review.reason_code)}</span>
+            </div>
+            <div className="fact">
+              <strong>Approve means</strong>
+              <span>Relay revalidates version {review.expected_version_at_plan} before attempting the settlement.</span>
+            </div>
+            <div className="fact">
+              <strong>Reject means</strong>
+              <span>No adapter call is made and the run fails closed with an audit event.</span>
             </div>
             <p>
               Run {shortId(review.run_id)} · planned version {review.expected_version_at_plan}
@@ -51,9 +59,17 @@ export default async function ReviewPage() {
       </section>
       {reviews.length === 0 ? (
         <section className="panel">
-          <p>No pending high-risk reviews.</p>
+          <h2>No pending reviews</h2>
+          <p>Known high-risk actions will appear here. Ambiguous technical states stay out of this queue.</p>
         </section>
       ) : null}
     </main>
   );
+}
+
+function reviewReason(reasonCode: string) {
+  if (reasonCode === "SETTLEMENT_REQUIRES_HUMAN_REVIEW" || reasonCode === "SETTLEMENT_REVIEW_REQUIRED") {
+    return "Settlement issuance is high risk and requires a human reviewer.";
+  }
+  return titleize(reasonCode);
 }

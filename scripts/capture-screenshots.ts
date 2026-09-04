@@ -16,6 +16,15 @@ const screenshotDir = path.join(process.cwd(), "docs", "screenshots");
 async function main() {
   await mkdir(screenshotDir, { recursive: true });
   await resetClaimFixtures(["CLM-1042", "CLM-2048"]);
+  const timeoutBefore = await createAndStartRun({
+    claimId: "CLM-1042",
+    requestText:
+      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
+    plannerMode: "deterministic",
+    faultProfileId: "timeout-before-write-reserve",
+    scenarioId: "screenshot-timeout-before"
+  });
+  await resetClaimFixtures(["CLM-1042"]);
   const timeout = await createAndStartRun({
     claimId: "CLM-1042",
     requestText:
@@ -42,6 +51,41 @@ async function main() {
     faultProfileId: "stale-version-before-second-action",
     scenarioId: "screenshot-stale"
   });
+  await resetClaimFixtures(["CLM-1042"]);
+  await createAndStartRun({
+    claimId: "CLM-1042",
+    requestText:
+      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
+    plannerMode: "deterministic",
+    faultProfileId: "none",
+    scenarioId: "screenshot-duplicate-first",
+    logicalRunNamespace: "screenshot-duplicate"
+  });
+  const duplicate = await createAndStartRun({
+    claimId: "CLM-1042",
+    requestText:
+      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
+    plannerMode: "deterministic",
+    faultProfileId: "none",
+    scenarioId: "screenshot-duplicate",
+    logicalRunNamespace: "screenshot-duplicate"
+  });
+  await resetClaimFixtures(["CLM-1042"]);
+  const retryExhaustion = await createAndStartRun({
+    claimId: "CLM-1042",
+    requestText: "Schedule another inspection.",
+    plannerMode: "deterministic",
+    faultProfileId: "retry-exhaustion-inspection",
+    scenarioId: "screenshot-retry-exhaustion"
+  });
+  await resetClaimFixtures(["CLM-2048"]);
+  const ambiguous = await createAndStartRun({
+    claimId: "CLM-2048",
+    requestText: "Issue the agreed $9,500 settlement.",
+    plannerMode: "deterministic",
+    faultProfileId: "ambiguous-write-and-readback-timeout",
+    scenarioId: "screenshot-ambiguous"
+  });
   await resetClaimFixtures(["CLM-2048"]);
   await createAndStartRun({
     claimId: "CLM-2048",
@@ -62,10 +106,14 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await screenshot(page, "/", "01-scenario-launcher.png");
     await screenshot(page, `/runs/${timeout.runId}`, "02-timeout-after-write.png");
-    await screenshot(page, `/runs/${partial.runId}`, "03-partial-completion.png");
-    await screenshot(page, `/runs/${stale.runId}`, "04-stale-version.png");
-    await screenshot(page, "/review", "05-review-queue.png");
-    await screenshot(page, "/evals", "06-eval-results.png");
+    await screenshot(page, `/runs/${timeoutBefore.runId}`, "03-timeout-before-write.png");
+    await screenshot(page, `/runs/${partial.runId}`, "04-partial-completion.png");
+    await screenshot(page, `/runs/${stale.runId}`, "05-stale-version.png");
+    await screenshot(page, `/runs/${duplicate.runId}`, "06-duplicate-request.png");
+    await screenshot(page, `/runs/${retryExhaustion.runId}`, "07-retry-exhaustion.png");
+    await screenshot(page, `/runs/${ambiguous.runId}`, "08-ambiguous-investigation.png");
+    await screenshot(page, "/review", "09-review-queue.png");
+    await screenshot(page, "/evals", "10-eval-results.png");
     await browser.close();
   } finally {
     stop(server);
