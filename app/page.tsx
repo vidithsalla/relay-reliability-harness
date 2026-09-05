@@ -7,17 +7,10 @@ export default function HomePage() {
       <section className="home-hero compact-hero">
         <div className="home-hero-copy">
           <h1>An AI agent makes a change. The API times out. What happened?</h1>
-          <div className="unknown-list" aria-label="Timeout uncertainty">
-            <span>Did the change fail?</span>
-            <span>Did it succeed but the response got lost?</span>
-            <strong>We don&apos;t know yet.</strong>
-          </div>
+          <p className="home-lede">Did it fail, succeed without returning a response, or leave us unable to tell?</p>
           <p className="home-lede">Relay sits between that failure and the retry.</p>
-          <p>
-            It checks what actually happened, then decides whether the action should be retried, left alone, replanned,
-            or stopped for review.
-          </p>
-          <p>This prevents blind retries from duplicating, overwriting, or repeating actions that already happened.</p>
+          <p>It checks what actually happened before deciding what should happen next.</p>
+          <p>That prevents blind retries from duplicating, overwriting, or repeating actions.</p>
           <div className="cta-row">
             <form action={runScenarioAction}>
               <input type="hidden" name="scenarioId" value="timeout-after-write" />
@@ -25,45 +18,53 @@ export default function HomePage() {
                 See how Relay handles failures
               </button>
             </form>
-            <Link className="button secondary" href="/scenarios">
-              Explore all scenarios
-            </Link>
           </div>
         </div>
       </section>
 
-      <section className="home-section example-section">
+      <section className="home-section explainer-section">
         <div className="section-heading">
-          <h2>Example</h2>
-          <p>An agent tries to update a reserve from $5,000 to $8,400.</p>
+          <h2>How Relay works</h2>
+          <p>
+            An agent tries to update a claim reserve from $5,000 to $8,400. The timeout is real, but it is not enough
+            to know whether the business change happened.
+          </p>
         </div>
-        <div className="example-flow" aria-label="Timeout after write example">
-          <ExampleStep number="1" label="Agent sends the update" value="Reserve -> $8,400" />
-          <ExampleStep number="2" label="API times out" value="No success response comes back" status="warning" />
-          <ExampleStep
-            number="3"
-            label="Relay checks the actual system"
-            value="Reserve is already $8,400"
-            status="success"
-          />
-          <ExampleStep number="4" label="Relay decides" value="Do not retry" status="success" />
+
+        <div className="relay-gap-explainer" aria-label="Relay timeout after write explanation">
+          <div className="gap-stack">
+            <ExplainerNode label="Agent intent" value="Reserve $5,000 -> $8,400" />
+            <ExplainerNode label="Enterprise call" value="API timeout" note="No success response comes back." tone="warning" />
+          </div>
+
+          <div className="gap-middle">
+            <div className="uncertainty-node">
+              <span>The uncertainty gap</span>
+              <strong>Did the change happen?</strong>
+              <p>The response cannot tell us.</p>
+            </div>
+            <div className="relay-node">
+              <span>Relay</span>
+              <strong>Checks what actually happened</strong>
+            </div>
+          </div>
+
+          <div className="gap-stack">
+            <ExplainerNode label="Actual system" value="Reserve = $8,400" tone="success" />
+            <ExplainerNode label="Safe decision" value="Do not retry" note="The effect already exists." tone="success" />
+          </div>
         </div>
         <p className="closing-line">
-          The request looked like it failed. The business action actually succeeded. Relay caught the difference.
+          The request looked like it failed. The business action actually succeeded. Relay caught the difference before
+          another write could run.
         </p>
       </section>
 
-      <section className="home-section how-section">
-        <div className="section-heading">
-          <h2>How it works</h2>
-        </div>
-        <div className="how-flow" aria-label="How Relay works">
-          <HowStep title="Agent tries an action" text="Relay records what was supposed to happen." />
-          <HowStep title="The enterprise call runs" text="It may succeed, fail, time out, or only partially complete." />
-          <HowStep title="Relay checks the real system state" text="It does not trust the API response by itself." />
-          <HowStep title="Relay compares intent with reality" text="What should have happened vs. what actually happened." />
-          <HowStep title="Relay chooses the safe next step" text="Retry, leave it alone, replan, or stop for a person." />
-        </div>
+      <section className="home-section bridge-section">
+        <p>
+          The same pattern lets Relay handle partial completion, stale state, duplicate requests, and outcomes that
+          cannot be safely proven.
+        </p>
       </section>
 
       <section className="home-section explore-section compact-explore">
@@ -74,12 +75,12 @@ export default function HomePage() {
           <FeaturedScenario
             scenarioId="timeout-after-write"
             title="Timeout after write"
-            text="The change happens, but the response is lost."
+            text="The change succeeds, but the response is lost."
           />
           <FeaturedScenario
             scenarioId="partial-completion"
             title="Partial completion"
-            text="One action succeeds, the next fails."
+            text="One action succeeds and the next fails."
           />
           <FeaturedScenario
             scenarioId="ambiguous-outcome"
@@ -98,23 +99,12 @@ export default function HomePage() {
   );
 }
 
-function ExampleStep(props: { number: string; label: string; value: string; status?: "success" | "warning" }) {
+function ExplainerNode(props: { label: string; value: string; note?: string; tone?: "success" | "warning" }) {
   return (
-    <div className={props.status ? `flow-row ${props.status}` : "flow-row"}>
-      <span>{props.number}</span>
-      <div>
-        <b>{props.label}</b>
-        <strong>{props.value}</strong>
-      </div>
-    </div>
-  );
-}
-
-function HowStep(props: { title: string; text: string }) {
-  return (
-    <div className="how-step">
-      <h3>{props.title}</h3>
-      <p>{props.text}</p>
+    <div className={props.tone ? `explainer-node ${props.tone}` : "explainer-node"}>
+      <span>{props.label}</span>
+      <strong>{props.value}</strong>
+      {props.note ? <p>{props.note}</p> : null}
     </div>
   );
 }

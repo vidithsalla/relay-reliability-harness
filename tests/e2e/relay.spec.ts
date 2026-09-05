@@ -7,13 +7,17 @@ test.beforeEach(() => {
 
 test("homepage explains Relay and launches the strongest demo", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })).toBeVisible();
-  await expect(page.getByText("We don't know yet.")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })
+  ).toBeVisible();
+  await expect(page.getByText("Did it fail, succeed without returning a response")).toBeVisible();
   await expect(page.getByText("Relay sits between that failure and the retry.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Example" })).toBeVisible();
-  await expect(page.getByText("The request looked like it failed. The business action actually succeeded.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "How Relay works" })).toBeVisible();
+  await expect(page.getByText("The uncertainty gap")).toBeVisible();
+  await expect(page.getByText("The response cannot tell us.")).toBeVisible();
+  await expect(page.getByText("Reserve = $8,400")).toBeVisible();
   await expect(page.getByText("Do not retry").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "How it works" })).toBeVisible();
+  await expect(page.getByText("Relay caught the difference before another write could run.")).toBeVisible();
   await page.getByRole("button", { name: "See how Relay handles failures" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
@@ -34,7 +38,9 @@ test("primary navigation keeps home and scenarios separate", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Failure Scenarios" })).toBeVisible();
   await page.getByRole("link", { name: "Relay" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })
+  ).toBeVisible();
 });
 
 test("happy path scenario launches from scenarios", async ({ page }) => {

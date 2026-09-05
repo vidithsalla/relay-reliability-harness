@@ -81,3 +81,13 @@
 - Changed the primary CTA to **See how Relay handles failures**, still using the existing `timeout-after-write` scenario through `runScenarioAction`.
 - Kept exactly four homepage sections: hero, example, how it works, and try the failure modes.
 - Left backend behavior, scenario logic, routes, reconciliation, retry logic, evals, database behavior, run-detail pages, and product semantics unchanged.
+
+## Homepage Structural Redesign Pass
+
+- Built a temporary `/design-lab` route with three structural variants before changing `/`: causal execution rail, before/with Relay comparison, and execution gap.
+- Selected Variant C, execution gap, because it made Relay's role spatially obvious: it sits between a timed-out enterprise call, an uncertainty checkpoint, the actual-state check, and the retry decision.
+- Rejected Variant A because the rail communicated causality well but still read as a linear process, making Relay less visibly positioned between uncertainty and the next action.
+- Rejected Variant B because the before/with comparison made the value proposition obvious, but it looked closer to an editorial comparison and de-emphasized the concrete reserve evidence.
+- Consolidated the homepage to four sections: hero, one integrated `How Relay works` explainer, one short bridge to broader failure modes, and `Try the failure modes`.
+- Removed the temporary `/design-lab` route and unused variant styles after promoting the selected structure.
+- Preserved backend behavior, runtime semantics, scenario definitions, run pages, reconciliation, recovery logic, database behavior, tests, and eval expectations.

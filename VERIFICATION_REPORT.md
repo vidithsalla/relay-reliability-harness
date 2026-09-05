@@ -1,6 +1,6 @@
 # VERIFICATION_REPORT
 
-Date/time: 2026-09-05 11:19:56 EDT
+Date/time: 2026-09-05 11:53:21 EDT
 
 Environment:
 
@@ -9,7 +9,8 @@ Environment:
 - PostgreSQL: 16.13 Homebrew fallback via `.relay-pgdata`
 - Docker: installed, but Docker Engine socket was unavailable
 - xAI live smoke: not run because `XAI_API_KEY` is not configured
-- Impeccable skill: not available in this environment; final product-quality pass used the available design-review and browser QA workflow
+- Requested structural design skills: `better-layout`, `better-typography`, `compact-landing`, `impeccable`, `better-ui`, `better-interface`, `emilkowalski/apple-design`, `emilkowalski/emil-design-eng`, and `scandinavian-design` were not available in this environment
+- Design workflow used: available `design-review` and browser QA skills
 
 ## Command Results
 
@@ -22,14 +23,16 @@ Environment:
 | `npm run eval` | PASS, 12/12 cases |
 | `npm run build` | PASS |
 | `npm run test:e2e` | PASS, 14 browser tests |
-| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `03004dd4-c0dc-4dfe-8241-ca1d376974c8` completed |
+| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `a9296370-63e5-48f0-9f04-03376c50be92` completed |
 | `npm run screenshots` | PASS, regenerated 11 screenshots |
 
 ## Browser Verification
 
 Manually exercised at `http://localhost:3012`:
 
-- homepage: simplified to four sections and starts directly with “An AI agent makes a change. The API times out. What happened?”;
+- homepage: consolidated to four sections and starts directly with “An AI agent makes a change. The API times out. What happened?”;
+- design-lab evaluation: compared causal execution rail, before/with Relay comparison, and execution-gap structures; promoted execution gap because it made Relay's position between timeout uncertainty and retry decision most visible;
+- integrated explainer: replaced separate Example and How it works sections with one `How Relay works` component showing agent intent, API timeout, uncertainty gap, Relay check, observed reserve `$8,400`, and safe no-retry decision;
 - direct demo CTA: **See how Relay handles failures** launches the existing Timeout After Write scenario and lands on a `/runs/...` trace with timeout, `CONFIRMED_APPLIED`, and no-retry evidence;
 - responsive homepage smoke: mobile width has no horizontal overflow and nav/CTA touch targets are at least 44px high;
 - scenario launcher: moved to `/scenarios`, shows all 9 existing scenarios, and launches the existing runtime paths without semantic changes;
