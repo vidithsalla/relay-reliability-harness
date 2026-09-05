@@ -4,11 +4,11 @@
 
 Open `/`.
 
-> AI agents can act on enterprise systems. Relay verifies what actually happened before anything retries.
+> An AI agent makes a change. The API times out. Relay checks what actually happened before the agent retries.
 
 12-30 seconds:
 
-Click **See it fail**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
+Click **See timeout after write**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
 
 30-50 seconds:
 

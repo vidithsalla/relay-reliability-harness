@@ -113,8 +113,8 @@ npm run verify:db
 
 ## 90-Second Demo
 
-1. Open `/` and explain: Relay verifies what actually happened before anything retries.
-2. Click **See it fail** to launch **Timeout after write** directly.
+1. Open `/` and explain: an API timeout does not prove whether the business action failed.
+2. Click **See timeout after write** to launch **Timeout after write** directly.
 3. On the run detail, show: action attempted, API timed out, read-back shows reserve changed, reconciliation is `CONFIRMED_APPLIED`, and no retry occurred.
 4. Run **Partial completion** and show reserve has one attempt while inspection has two.
 5. Run **Stale state** and show expected-version conflict leading to `REPLAN_REQUIRED`.

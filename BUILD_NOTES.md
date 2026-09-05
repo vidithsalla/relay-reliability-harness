@@ -62,6 +62,14 @@
 - Reduced `/` from a long explanatory page to four sections: hero, one timeout example, general recovery rule, and try-it entry points.
 - Removed the hero proof card, the three-panel “problem in 15 seconds” layout, the five-step lifecycle, repeated proof grid, broad failure explanation section, “What Relay is” definition, and AI/Relay/enterprise trust-boundary diagram from the homepage.
 - Re-homed the detailed product definition, reliability feature list, deterministic failure/reconciliation/idempotency/version-check terminology, planner boundary, optional xAI/Grok explanation, and architecture flow to `/about`.
-- Changed the homepage primary CTA to a direct **See it fail** form that reuses the existing `timeout-after-write` scenario through `runScenarioAction`; no new runtime path or scenario behavior was added.
+- Changed the homepage primary CTA to a direct **See timeout after write** form that reuses the existing `timeout-after-write` scenario through `runScenarioAction`; no new runtime path or scenario behavior was added.
 - Kept `/scenarios` unchanged as the full scenario launcher and retained the small synthetic-claims disclosure at the bottom of `/`.
 - Added e2e coverage for the direct homepage demo CTA while preserving scenario, review, eval, and run-detail coverage.
+
+## Homepage Concrete Story Pass
+
+- Rewrote `/` around one concrete failure story: claim reserve change, API timeout, actual reserve already updated, Relay decides not to retry.
+- Replaced abstract homepage terms such as “enterprise systems,” “safe next step,” and “authoritative evidence” with direct language about what happened, the actual system, and not repeating a successful action.
+- Renamed the primary CTA to **See timeout after write** while keeping it wired to the existing `timeout-after-write` scenario through `runScenarioAction`.
+- Updated the general outcomes to: already happened/don’t do it again, definitely didn’t happen/retry safely, and can’t prove either/stop and investigate.
+- Preserved the four-section homepage structure, `/scenarios` behavior, run detail behavior, reliability engine, database semantics, and eval expectations.

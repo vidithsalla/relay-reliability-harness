@@ -8,11 +8,13 @@ test.beforeEach(() => {
 test("homepage explains Relay and launches the strongest demo", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
-  await expect(page.getByText("AI agents can act on enterprise systems.")).toBeVisible();
+  await expect(page.getByText("An AI agent makes a change. The API times out.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Why Relay exists" })).toBeVisible();
-  await expect(page.getByText("A timeout does not necessarily mean the action failed.")).toBeVisible();
-  await expect(page.getByText("Applied - Do not retry")).toBeVisible();
-  await page.getByRole("button", { name: "See it fail" }).click();
+  await expect(page.getByText("The API said 'timeout.' The business action still succeeded.")).toBeVisible();
+  await expect(page.getByText("Do not retry").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What Relay decides after every action" })).toBeVisible();
+  await expect(page.getByText("Don't do it again")).toBeVisible();
+  await page.getByRole("button", { name: "See timeout after write" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();

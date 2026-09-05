@@ -1,6 +1,6 @@
 # VERIFICATION_REPORT
 
-Date/time: 2026-09-04 19:43:52 EDT
+Date/time: 2026-09-04 21:08:57 EDT
 
 Environment:
 
@@ -22,15 +22,15 @@ Environment:
 | `npm run eval` | PASS, 12/12 cases |
 | `npm run build` | PASS |
 | `npm run test:e2e` | PASS, 14 browser tests |
-| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `d97bfd91-081f-4cbe-90c9-b252e912f589` completed |
+| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `061786d0-b5cd-41a5-a53c-23e79ccd20e2` completed |
 | `npm run screenshots` | PASS, regenerated 11 screenshots |
 
 ## Browser Verification
 
 Manually exercised at `http://localhost:3012`:
 
-- homepage: simplified to four sections that answer problem, concrete example, general rule, and where to try it;
-- direct demo CTA: **See it fail** launches the existing Timeout After Write scenario and lands on a `/runs/...` trace with timeout, `CONFIRMED_APPLIED`, and no-retry evidence;
+- homepage: simplified to four sections and rewritten around one concrete Timeout After Write story;
+- direct demo CTA: **See timeout after write** launches the existing Timeout After Write scenario and lands on a `/runs/...` trace with timeout, `CONFIRMED_APPLIED`, and no-retry evidence;
 - responsive homepage smoke: mobile width has no horizontal overflow and nav/CTA touch targets are at least 44px high;
 - scenario launcher: moved to `/scenarios`, shows all 9 existing scenarios, and launches the existing runtime paths without semantic changes;
 - navigation: Relay logo routes to `/`; Scenarios routes to `/scenarios`; Runs, Review, Evals, and About remain unchanged;
