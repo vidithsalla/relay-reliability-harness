@@ -6,18 +6,23 @@ export default function HomePage() {
     <main className="home-page compact-home">
       <section className="home-hero compact-hero">
         <div className="home-hero-copy">
-          <h1>Relay</h1>
-          <p className="home-lede">
-            An AI agent makes a change. The API times out. Did the change fail, or did it succeed and only the
-            response get lost?
+          <h1>An AI agent makes a change. The API times out. What happened?</h1>
+          <div className="unknown-list" aria-label="Timeout uncertainty">
+            <span>Did the change fail?</span>
+            <span>Did it succeed but the response got lost?</span>
+            <strong>We don&apos;t know yet.</strong>
+          </div>
+          <p className="home-lede">Relay sits between that failure and the retry.</p>
+          <p>
+            It checks what actually happened, then decides whether the action should be retried, left alone, replanned,
+            or stopped for review.
           </p>
-          <p>Relay checks what actually happened before the agent retries.</p>
-          <p>A blind retry can duplicate payments, overwrite newer data, or repeat actions that already succeeded.</p>
+          <p>This prevents blind retries from duplicating, overwriting, or repeating actions that already happened.</p>
           <div className="cta-row">
             <form action={runScenarioAction}>
               <input type="hidden" name="scenarioId" value="timeout-after-write" />
               <button className="button" type="submit">
-                See timeout after write
+                See how Relay handles failures
               </button>
             </form>
             <Link className="button secondary" href="/scenarios">
@@ -29,27 +34,35 @@ export default function HomePage() {
 
       <section className="home-section example-section">
         <div className="section-heading">
-          <h2>Why Relay exists</h2>
+          <h2>Example</h2>
+          <p>An agent tries to update a reserve from $5,000 to $8,400.</p>
         </div>
         <div className="example-flow" aria-label="Timeout after write example">
-          <FlowStep label="Agent asks" value="Set claim reserve to $8,400" />
-          <FlowStep label="API response" value="TIMEOUT" status="warning" />
-          <FlowStep label="Actual system" value="Reserve is already $8,400" status="success" />
-          <FlowStep label="Relay decision" value="Do not retry" status="success" />
+          <ExampleStep number="1" label="Agent sends the update" value="Reserve -> $8,400" />
+          <ExampleStep number="2" label="API times out" value="No success response comes back" status="warning" />
+          <ExampleStep
+            number="3"
+            label="Relay checks the actual system"
+            value="Reserve is already $8,400"
+            status="success"
+          />
+          <ExampleStep number="4" label="Relay decides" value="Do not retry" status="success" />
         </div>
-        <p className="closing-line">The API said &apos;timeout.&apos; The business action still succeeded.</p>
-        <p className="example-support">Relay checks the system of record before deciding what happens next.</p>
+        <p className="closing-line">
+          The request looked like it failed. The business action actually succeeded. Relay caught the difference.
+        </p>
       </section>
 
-      <section className="home-section rule-section">
+      <section className="home-section how-section">
         <div className="section-heading">
-          <h2>What Relay decides after every action</h2>
-          <p>Relay decides from the actual system state, not the API response alone.</p>
+          <h2>How it works</h2>
         </div>
-        <div className="outcome-strip" aria-label="Relay recovery outcomes">
-          <Outcome label="It already happened" value="Don't do it again" tone="success" />
-          <Outcome label="It definitely didn't happen" value="Retry safely" tone="warning" />
-          <Outcome label="We can't prove either" value="Stop and investigate" tone="manual" />
+        <div className="how-flow" aria-label="How Relay works">
+          <HowStep title="Agent tries an action" text="Relay records what was supposed to happen." />
+          <HowStep title="The enterprise call runs" text="It may succeed, fail, time out, or only partially complete." />
+          <HowStep title="Relay checks the real system state" text="It does not trust the API response by itself." />
+          <HowStep title="Relay compares intent with reality" text="What should have happened vs. what actually happened." />
+          <HowStep title="Relay chooses the safe next step" text="Retry, leave it alone, replan, or stop for a person." />
         </div>
       </section>
 
@@ -61,12 +74,12 @@ export default function HomePage() {
           <FeaturedScenario
             scenarioId="timeout-after-write"
             title="Timeout after write"
-            text="The write succeeds, but the response is lost."
+            text="The change happens, but the response is lost."
           />
           <FeaturedScenario
             scenarioId="partial-completion"
             title="Partial completion"
-            text="One action succeeds, the next one fails."
+            text="One action succeeds, the next fails."
           />
           <FeaturedScenario
             scenarioId="ambiguous-outcome"
@@ -85,20 +98,23 @@ export default function HomePage() {
   );
 }
 
-function FlowStep(props: { label: string; value: string; status?: "success" | "warning" }) {
+function ExampleStep(props: { number: string; label: string; value: string; status?: "success" | "warning" }) {
   return (
     <div className={props.status ? `flow-row ${props.status}` : "flow-row"}>
-      <span>{props.label}</span>
-      <strong>{props.value}</strong>
+      <span>{props.number}</span>
+      <div>
+        <b>{props.label}</b>
+        <strong>{props.value}</strong>
+      </div>
     </div>
   );
 }
 
-function Outcome(props: { label: string; value: string; tone: "success" | "warning" | "manual" }) {
+function HowStep(props: { title: string; text: string }) {
   return (
-    <div className={`outcome ${props.tone}`}>
-      <span>{props.label}</span>
-      <strong>{props.value}</strong>
+    <div className="how-step">
+      <h3>{props.title}</h3>
+      <p>{props.text}</p>
     </div>
   );
 }

@@ -7,14 +7,14 @@ test.beforeEach(() => {
 
 test("homepage explains Relay and launches the strongest demo", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
-  await expect(page.getByText("An AI agent makes a change. The API times out.")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Why Relay exists" })).toBeVisible();
-  await expect(page.getByText("The API said 'timeout.' The business action still succeeded.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })).toBeVisible();
+  await expect(page.getByText("We don't know yet.")).toBeVisible();
+  await expect(page.getByText("Relay sits between that failure and the retry.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Example" })).toBeVisible();
+  await expect(page.getByText("The request looked like it failed. The business action actually succeeded.")).toBeVisible();
   await expect(page.getByText("Do not retry").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: "What Relay decides after every action" })).toBeVisible();
-  await expect(page.getByText("Don't do it again")).toBeVisible();
-  await page.getByRole("button", { name: "See timeout after write" }).click();
+  await expect(page.getByRole("heading", { name: "How it works" })).toBeVisible();
+  await page.getByRole("button", { name: "See how Relay handles failures" }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
@@ -34,7 +34,7 @@ test("primary navigation keeps home and scenarios separate", async ({ page }) =>
   await expect(page.getByRole("heading", { name: "Failure Scenarios" })).toBeVisible();
   await page.getByRole("link", { name: "Relay" }).click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.getByRole("heading", { name: "Relay", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })).toBeVisible();
 });
 
 test("happy path scenario launches from scenarios", async ({ page }) => {
