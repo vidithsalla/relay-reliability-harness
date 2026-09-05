@@ -8,7 +8,7 @@ test.beforeEach(() => {
 test("homepage explains Relay and launches the strongest demo", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })
+    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What actually happened?" })
   ).toBeVisible();
   await expect(page.getByText("Did it fail, succeed without returning a response")).toBeVisible();
   await expect(page.getByText("Relay sits between that failure and the retry.")).toBeVisible();
@@ -18,10 +18,32 @@ test("homepage explains Relay and launches the strongest demo", async ({ page })
   await expect(page.getByText("Reserve = $8,400")).toBeVisible();
   await expect(page.getByText("Do not retry").first()).toBeVisible();
   await expect(page.getByText("Relay caught the difference before another write could run.")).toBeVisible();
-  await page.getByRole("button", { name: "See how Relay handles failures" }).click();
+  await page.getByRole("link", { name: "See how Relay handles failures" }).click();
+  await expect(page).toHaveURL(/#proof$/);
+  await expect(page.getByRole("heading", { name: "See the proof" })).toBeVisible();
+  const proof = page.locator(".proof-section");
+  await expect(proof.getByRole("button", { name: /Run a failure/ })).toBeVisible();
+  await expect(proof.getByRole("link", { name: /Inspect a trace/ })).toBeVisible();
+  await expect(proof.getByRole("link", { name: /View the evals/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Under the hood" })).toBeVisible();
+  await expect(page.getByText("The planner proposes intent. Deterministic software owns execution safety.")).toBeVisible();
+  await proof.getByRole("button", { name: /Run a failure/ }).click();
   await expect(page.getByRole("heading", { name: /Reliability Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
+});
+
+test("homepage proof gateway links to traces and evals", async ({ page }) => {
+  await page.goto("/");
+  const proof = page.locator(".proof-section");
+  await proof.getByRole("link", { name: /Inspect a trace/ }).click();
+  await expect(page).toHaveURL(/\/runs$/);
+  await expect(page.getByRole("heading", { name: "Runs" })).toBeVisible();
+
+  await page.goto("/");
+  await page.locator(".proof-section").getByRole("link", { name: /View the evals/ }).click();
+  await expect(page).toHaveURL(/\/evals$/);
+  await expect(page.getByRole("heading", { name: "Evals" })).toBeVisible();
 });
 
 test("homepage secondary CTA routes to scenarios", async ({ page }) => {
@@ -39,7 +61,7 @@ test("primary navigation keeps home and scenarios separate", async ({ page }) =>
   await page.getByRole("link", { name: "Relay" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(
-    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What happened?" })
+    page.getByRole("heading", { name: "An AI agent makes a change. The API times out. What actually happened?" })
   ).toBeVisible();
 });
 

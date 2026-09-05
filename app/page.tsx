@@ -6,23 +6,23 @@ export default function HomePage() {
     <main className="home-page compact-home">
       <section className="home-hero compact-hero">
         <div className="home-hero-copy">
-          <h1>An AI agent makes a change. The API times out. What happened?</h1>
+          <h1>An AI agent makes a change. The API times out. What actually happened?</h1>
           <p className="home-lede">Did it fail, succeed without returning a response, or leave us unable to tell?</p>
           <p className="home-lede">Relay sits between that failure and the retry.</p>
           <p>It checks what actually happened before deciding what should happen next.</p>
           <p>That prevents blind retries from duplicating, overwriting, or repeating actions.</p>
           <div className="cta-row">
-            <form action={runScenarioAction}>
-              <input type="hidden" name="scenarioId" value="timeout-after-write" />
-              <button className="button" type="submit">
-                See how Relay handles failures
-              </button>
-            </form>
+            <a className="button" href="#proof">
+              See how Relay handles failures
+            </a>
+            <Link className="hero-text-link" href="/scenarios">
+              Explore all scenarios
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="home-section explainer-section">
+      <section className="home-section explainer-section" id="how-relay-works">
         <div className="section-heading">
           <h2>How Relay works</h2>
           <p>
@@ -67,6 +67,82 @@ export default function HomePage() {
         </p>
       </section>
 
+      <section className="home-section proof-section" id="proof" aria-labelledby="proof-heading">
+        <div className="section-heading">
+          <h2 id="proof-heading">See the proof</h2>
+          <p>Run the failure, inspect the saved trace, or check the deterministic eval suite.</p>
+        </div>
+        <div className="proof-gateway">
+          <form action={runScenarioAction} className="proof-form">
+            <input type="hidden" name="scenarioId" value="timeout-after-write" />
+            <button className="proof-entry" type="submit">
+              <ProofPreview
+                items={[
+                  ["API", "Timeout", "warning"],
+                  ["Observed", "$8,400", "success"],
+                  ["Decision", "Do not retry", "success"]
+                ]}
+              />
+              <span className="proof-label">Run a failure</span>
+              <span className="proof-copy">Trigger timeout-after-write and watch Relay prevent a duplicate retry.</span>
+            </button>
+          </form>
+          <Link className="proof-entry" href="/runs">
+            <div className="mini-timeline" aria-hidden="true">
+              <span>Attempt</span>
+              <span>Timeout</span>
+              <span>Read-back</span>
+              <span>Confirmed Applied</span>
+              <span>Complete</span>
+            </div>
+            <span className="proof-label">Inspect a trace</span>
+            <span className="proof-copy">See the attempted action, read-back, reconciliation, and recovery decision.</span>
+          </Link>
+          <Link className="proof-entry" href="/evals">
+            <div className="eval-preview" aria-hidden="true">
+              <span>Eval suite</span>
+              <strong>12 / 12</strong>
+              <span>deterministic cases</span>
+            </div>
+            <span className="proof-label">View the evals</span>
+            <span className="proof-copy">Inspect the deterministic regression suite covering the failure semantics.</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className="home-section hood-section" aria-labelledby="hood-heading">
+        <div className="section-heading">
+          <h2 id="hood-heading">Under the hood</h2>
+          <p>The planner proposes intent. Deterministic software owns execution safety.</p>
+        </div>
+        <div className="hood-grid">
+          <HoodItem
+            title="Failure injection"
+            text="Reproduces timeout-before-write, timeout-after-write, partial completion, stale state, and other failure conditions deterministically."
+            href="/scenarios"
+            linkText="See scenarios"
+          />
+          <HoodItem
+            title="Reconciliation + recovery"
+            text="Compares intended effects with the resulting system state before deciding whether to leave an action alone, retry selectively, replan, or stop."
+            href="/runs"
+            linkText="Inspect a trace"
+          />
+          <HoodItem
+            title="Execution safety"
+            text="Uses idempotency, expected-version checks, retry limits, selective retry, and human review to prevent unsafe repeated mutations."
+            href="/scenarios"
+            linkText="See failure cases"
+          />
+          <HoodItem
+            title="Verification"
+            text="Persists execution evidence in Postgres and exercises the reliability semantics through replayable traces, integration tests, browser workflows, and deterministic evals."
+            href="/evals"
+            linkText="View evals"
+          />
+        </div>
+      </section>
+
       <section className="home-section explore-section compact-explore">
         <div className="section-heading">
           <h2>Try the failure modes</h2>
@@ -99,6 +175,19 @@ export default function HomePage() {
   );
 }
 
+function ProofPreview(props: { items: Array<[string, string, "warning" | "success"]> }) {
+  return (
+    <div className="proof-preview" aria-hidden="true">
+      {props.items.map(([label, value, tone]) => (
+        <span className={tone} key={label}>
+          <b>{label}</b>
+          <strong>{value}</strong>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function ExplainerNode(props: { label: string; value: string; note?: string; tone?: "success" | "warning" }) {
   return (
     <div className={props.tone ? `explainer-node ${props.tone}` : "explainer-node"}>
@@ -106,6 +195,16 @@ function ExplainerNode(props: { label: string; value: string; note?: string; ton
       <strong>{props.value}</strong>
       {props.note ? <p>{props.note}</p> : null}
     </div>
+  );
+}
+
+function HoodItem(props: { title: string; text: string; href: string; linkText: string }) {
+  return (
+    <article className="hood-item">
+      <h3>{props.title}</h3>
+      <p>{props.text}</p>
+      <Link href={props.href}>{props.linkText}</Link>
+    </article>
   );
 }
 

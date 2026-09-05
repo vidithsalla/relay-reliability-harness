@@ -8,7 +8,7 @@ Open `/`.
 
 12-30 seconds:
 
-Click **See how Relay handles failures**. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
+Click **See how Relay handles failures**, then **Run a failure** in the proof gateway. Show that reserve update committed, the adapter timed out, Relay read authoritative state back, reconciled the mutation as `CONFIRMED_APPLIED`, and did not retry.
 
 30-50 seconds:
 

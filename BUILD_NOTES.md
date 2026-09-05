@@ -91,3 +91,11 @@
 - Consolidated the homepage to four sections: hero, one integrated `How Relay works` explainer, one short bridge to broader failure modes, and `Try the failure modes`.
 - Removed the temporary `/design-lab` route and unused variant styles after promoting the selected structure.
 - Preserved backend behavior, runtime semantics, scenario definitions, run pages, reconciliation, recovery logic, database behavior, tests, and eval expectations.
+
+## Final Homepage Information Hierarchy Pass
+
+- Reordered `/` around progressive disclosure: hero problem, `How Relay works`, compact proof gateway, restrained `Under the hood`, and `Try the failure modes`.
+- Changed the hero CTA to jump to the proof gateway instead of launching immediately, so a first-time reviewer sees the explanation before choosing demo, trace, or eval evidence.
+- Added three proof gateway entries using existing routes and server actions only: `Run a failure` submits `timeout-after-write`, `Inspect a trace` opens `/runs`, and `View the evals` opens `/evals`.
+- Added four restrained `Under the hood` items for failure injection, reconciliation + recovery, execution safety, and verification, including the statement that the planner proposes intent while deterministic software owns execution safety.
+- Preserved the uncertainty-gap explainer and only tightened surrounding hierarchy; no backend behavior, routes, scenario semantics, reconciliation, recovery, database logic, eval definitions, or run-detail functionality changed.
