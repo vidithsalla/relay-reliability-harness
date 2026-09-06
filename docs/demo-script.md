@@ -20,7 +20,7 @@ Run **Stale state**. Show expected version 18 versus observed version 19 and `RE
 
 68-82 seconds:
 
-Run **High-risk settlement**. Open `/review`, approve, and show server revalidation before execution.
+Run **High-risk settlement**. Open Review Queue (`/review`), approve, and show server revalidation before execution.
 
 82-90 seconds:
 

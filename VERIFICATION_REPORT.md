@@ -1,6 +1,6 @@
 # VERIFICATION_REPORT
 
-Date/time: 2026-09-05 16:54:26 EDT
+Date/time: 2026-09-05 22:24:25 EDT
 
 Environment:
 
@@ -24,21 +24,25 @@ Environment:
 | `npm run build` | PASS |
 | `npm run test:e2e` | PASS, 15 browser tests |
 | `npm run screenshots` | PASS, regenerated 11 screenshots |
-| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `79179b11-72bb-488a-a42e-8041ccc7b673` completed |
+| `npm run verify:db` | PASS, fresh-client persistence verification; final checked run `c15a87cc-cda6-41df-9ae5-ea173353b8b4` completed |
 
 ## Browser Verification
 
 Manually exercised at `http://localhost:3012`:
 
+- navigation: visible labels are Relay, Scenarios, Traces, Review Queue, Evals, and About; existing route paths stayed unchanged;
 - homepage order: hero problem, `How Relay works` uncertainty-gap explainer, `See the proof` gateway, `Under the hood`, and `Try the failure modes`;
 - hero: starts directly with “An AI agent makes a change. The API times out. What actually happened?” and keeps one primary CTA plus one quiet scenarios link;
 - integrated explainer: preserves the selected execution-gap structure showing agent intent, API timeout, uncertainty, Relay's real-state check, observed reserve `$8,400`, and safe no-retry decision;
-- proof gateway: **See how Relay handles failures** jumps to `#proof`; **Run a failure** submits existing `timeout-after-write`; **Inspect a trace** opens `/runs`; **View the evals** opens `/evals`;
+- proof gateway: **See how Relay handles failures** jumps to `#proof`; **Run a failure** submits existing `timeout-after-write`; **Inspect a trace** opens Execution traces at `/runs`; **View the evals** opens Reliability evals at `/evals`;
 - under the hood: four restrained engineering items cover failure injection, reconciliation + recovery, execution safety, and verification, with the planner/execution-safety boundary stated inline;
-- responsive homepage smoke: laptop, large desktop, and mobile widths were checked; mobile width has no horizontal overflow and all measured interactive targets meet the touch-size baseline;
+- Execution traces: page title and subtitle explain saved evidence traces; table columns read `Trace`, `Scenario`, `Outcome`, `Evidence`, `Recovery`, and `Created`;
+- Review Queue: page title and subtitle distinguish known high-risk authorization from ambiguous manual investigation; cards show proposed action, review reason, risk/threshold, source state, approve behavior, and reject behavior;
+- Reliability evals: page title and subtitle state that deterministic regression cases verify Relay's safe outcome selection under failure modes;
+- Scenarios: page title is `Scenarios` with a concise controlled-failure subtitle;
+- responsive smoke: laptop, large desktop, and mobile widths were checked; mobile width has no horizontal overflow and all measured interactive targets meet the touch-size baseline;
 - keyboard smoke: nav, hero CTA, secondary link, and proof gateway controls are reachable by tab with visible focus outlines;
-- scenario launcher: moved to `/scenarios`, shows all 9 existing scenarios, and launches the existing runtime paths without semantic changes;
-- navigation: Relay logo routes to `/`; Scenarios routes to `/scenarios`; Runs, Review, Evals, and About remain unchanged;
+- scenario launcher: `/scenarios` shows all 9 existing scenarios and launches the existing runtime paths without semantic changes;
 - timeout-after-write: intended reserve write, `SET_RESERVE -> Timeout`, action-specific read-back at version 18, `CONFIRMED_APPLIED`, and no duplicate retry are visible in the first proof panel;
 - timeout-before-write: first read-back shows reserve still `$5,000`, reconciliation is `CONFIRMED_NOT_APPLIED`, then only the safe action retries;
 - partial completion: reserve remains completed while inspection retries selectively;

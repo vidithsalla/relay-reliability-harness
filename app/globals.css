@@ -143,6 +143,7 @@ p {
 }
 
 .panel {
+  overflow-x: auto;
   margin-bottom: 18px;
 }
 
@@ -243,6 +244,7 @@ p {
 
 .table {
   border-collapse: collapse;
+  min-width: 680px;
   width: 100%;
 }
 
@@ -480,6 +482,13 @@ p {
 .fact strong {
   display: block;
   margin-bottom: 6px;
+}
+
+.eval-summary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 14px 0 4px;
 }
 
 .timeline {
@@ -1056,7 +1065,8 @@ pre {
   .proof-grid,
   .evidence-row,
   .evidence-cells,
-  .audit-event {
+  .audit-event,
+  .eval-summary {
     grid-template-columns: 1fr;
   }
 

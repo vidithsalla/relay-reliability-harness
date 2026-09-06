@@ -9,8 +9,8 @@ export default function ScenariosPage() {
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>Failure Scenarios</h1>
-          <p>Stress-test enterprise agent actions against failures that happen after execution begins.</p>
+          <h1>Scenarios</h1>
+          <p>Controlled failure cases for testing how Relay behaves when enterprise actions do not resolve cleanly.</p>
           <p>Synthetic claims workflow. No real insurer or Guidewire integration.</p>
         </div>
       </div>

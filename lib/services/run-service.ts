@@ -477,7 +477,7 @@ export async function listRuns() {
 
 export async function listPendingReviews() {
   const result = await pool.query(`
-    SELECT rr.*, wr.claim_id, wr.request_text, pa.action_type, pa.arguments_json, pa.expected_version_at_plan
+    SELECT rr.*, wr.claim_id, wr.request_text, pa.action_type, pa.arguments_json, pa.risk_level, pa.expected_version_at_plan
     FROM review_requests rr
     JOIN workflow_runs wr ON wr.id = rr.run_id
     JOIN planned_actions pa ON pa.id = rr.planned_action_id

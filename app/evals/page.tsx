@@ -10,8 +10,8 @@ export default async function EvalsPage() {
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>Evals</h1>
-          <p>Deterministic regression cases persisted from coordinator-level runs.</p>
+          <h1>Reliability evals</h1>
+          <p>Deterministic regression cases that verify Relay chooses the expected safe outcome under each failure mode.</p>
         </div>
         <form action={runEvalAction}>
           <button className="button" type="submit">
@@ -26,6 +26,25 @@ export default async function EvalsPage() {
               Latest suite: {latest.run.passed_cases}/{latest.run.total_cases} passed
             </h2>
             <p>
+              These failure semantics are regression-tested: retry when absence is proven, do not retry when the effect
+              already exists, replan on stale state, stop when the outcome cannot be proven, require review for high-risk
+              actions, and prevent duplicate effects.
+            </p>
+            <div className="eval-summary">
+              <div className="fact">
+                <strong>{latest.run.total_cases} deterministic cases</strong>
+                <span>Failure modes run through the coordinator.</span>
+              </div>
+              <div className="fact">
+                <strong>Expected outcome checked</strong>
+                <span>Each case asserts the safe recovery behavior.</span>
+              </div>
+              <div className="fact">
+                <strong>Persisted evidence</strong>
+                <span>Eval results are saved for inspection.</span>
+              </div>
+            </div>
+            <p>
               Started {new Date(latest.run.started_at).toLocaleString()} · readiness{" "}
               {latest.run.failed_cases === 0 ? "READY_FOR_DEMO" : "NOT_READY_FOR_DEMO"}
             </p>
@@ -33,8 +52,8 @@ export default async function EvalsPage() {
               <thead>
                 <tr>
                   <th>Case</th>
-                  <th>Status</th>
-                  <th>Assertions</th>
+                  <th>Result</th>
+                  <th>Checks passed</th>
                   <th>Failure</th>
                 </tr>
               </thead>
@@ -55,7 +74,7 @@ export default async function EvalsPage() {
             </table>
           </>
         ) : (
-          <p>No eval run has been persisted yet.</p>
+          <p>No reliability eval run has been persisted yet.</p>
         )}
       </section>
     </main>

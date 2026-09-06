@@ -15,7 +15,7 @@ export function shortId(id: string): string {
 export function titleize(value?: string | null): string {
   if (!value) return "None";
   return value
-    .replace(/_/g, " ")
+    .replace(/[_-]/g, " ")
     .toLowerCase()
     .replace(/\b\w/g, (match) => match.toUpperCase());
 }

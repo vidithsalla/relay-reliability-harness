@@ -99,3 +99,12 @@
 - Added three proof gateway entries using existing routes and server actions only: `Run a failure` submits `timeout-after-write`, `Inspect a trace` opens `/runs`, and `View the evals` opens `/evals`.
 - Added four restrained `Under the hood` items for failure injection, reconciliation + recovery, execution safety, and verification, including the statement that the planner proposes intent while deterministic software owns execution safety.
 - Preserved the uncertainty-gap explainer and only tightened surrounding hierarchy; no backend behavior, routes, scenario semantics, reconciliation, recovery, database logic, eval definitions, or run-detail functionality changed.
+
+## Navigation and Page Orientation Pass
+
+- Changed visible navigation labels to `Relay`, `Scenarios`, `Traces`, `Review Queue`, `Evals`, and `About` while keeping existing `/runs`, `/review`, `/evals`, `/scenarios`, and `/about` routes stable.
+- Renamed the `/runs` list to `Execution traces` and relabeled its table to `Trace`, `Scenario`, `Outcome`, `Evidence`, `Recovery`, and `Created`.
+- Renamed trace detail headings from `Reliability Trace` to `Execution Trace` and changed visible metadata from `Run` to `Trace`; persisted run IDs, routes, and execution semantics remain unchanged.
+- Renamed `/review` to `Review Queue` and surfaced existing review evidence: proposed action, review reason, risk/threshold, source state, approve behavior, and reject behavior.
+- Renamed `/evals` to `Reliability evals` and added concise context that the deterministic suite verifies safe recovery outcomes, not generic model quality.
+- Kept `Scenarios` as the page name and changed its subtitle to describe controlled failure cases.

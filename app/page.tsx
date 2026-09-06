@@ -70,7 +70,7 @@ export default function HomePage() {
       <section className="home-section proof-section" id="proof" aria-labelledby="proof-heading">
         <div className="section-heading">
           <h2 id="proof-heading">See the proof</h2>
-          <p>Run the failure, inspect the saved trace, or check the deterministic eval suite.</p>
+          <p>Run the failure, inspect an execution trace, or check the reliability evals.</p>
         </div>
         <div className="proof-gateway">
           <form action={runScenarioAction} className="proof-form">
@@ -96,7 +96,7 @@ export default function HomePage() {
               <span>Complete</span>
             </div>
             <span className="proof-label">Inspect a trace</span>
-            <span className="proof-copy">See the attempted action, read-back, reconciliation, and recovery decision.</span>
+            <span className="proof-copy">Open Execution Traces to see the attempted action, read-back, reconciliation, and recovery decision.</span>
           </Link>
           <Link className="proof-entry" href="/evals">
             <div className="eval-preview" aria-hidden="true">
@@ -105,7 +105,7 @@ export default function HomePage() {
               <span>deterministic cases</span>
             </div>
             <span className="proof-label">View the evals</span>
-            <span className="proof-copy">Inspect the deterministic regression suite covering the failure semantics.</span>
+            <span className="proof-copy">Open Reliability Evals to inspect the deterministic regression suite covering the failure semantics.</span>
           </Link>
         </div>
       </section>

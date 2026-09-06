@@ -50,10 +50,10 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>{detail.run.claim_id} Reliability Trace</h1>
+          <h1>{detail.run.claim_id} Execution Trace</h1>
           <p>{detail.run.request_text}</p>
           <p>
-            Planner: {detail.run.planner_mode} · Fault: {faultLabel(detail.run.fault_profile_id)} · Run{" "}
+            Planner: {detail.run.planner_mode} · Fault: {faultLabel(detail.run.fault_profile_id)} · Trace{" "}
             {shortId(detail.run.id)}
           </p>
         </div>
@@ -434,14 +434,14 @@ function operatorDecisionFor(
   if (status === "REPLAN_REQUIRED") {
     return {
       summary: "The planned expected version no longer matches the source of record. Relay stopped before overwriting state.",
-      nextStep: "Start a new run from current claim state."
+      nextStep: "Start a new execution from current claim state."
     };
   }
   if (status === "MANUAL_INVESTIGATION") {
     if (reconciliationStatus === "CONFIRMED_NOT_APPLIED" || recoveryReasonCode === "RETRY_LIMIT_REACHED") {
       return {
         summary: "Relay proved the attempted effect is absent, but the automatic retry limit is exhausted.",
-        nextStep: "Inspect the retry history and start a new run only after confirming the source system is healthy."
+        nextStep: "Inspect the retry history and start a new execution only after confirming the source system is healthy."
       };
     }
     return {
@@ -453,17 +453,17 @@ function operatorDecisionFor(
     if (hasRejectedAction) {
       return {
         summary: "A reviewer rejected the known high-risk action. Relay failed closed and made no adapter call.",
-        nextStep: "Start a new run only if the business request changes or a new approval decision is made."
+        nextStep: "Start a new execution only if the business request changes or a new approval decision is made."
       };
     }
     return {
       summary: "Deterministic policy blocked the action before adapter execution.",
-      nextStep: "Correct the request or claim state, then start a new run."
+      nextStep: "Correct the request or claim state, then start a new execution."
     };
   }
   return {
     summary: "Relay is still processing or waiting for the next deterministic step.",
-    nextStep: "Refresh the run detail or inspect the latest recovery decision."
+    nextStep: "Refresh the trace or inspect the latest recovery decision."
   };
 }
 

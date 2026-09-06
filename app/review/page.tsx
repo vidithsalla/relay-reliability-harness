@@ -10,8 +10,12 @@ export default async function ReviewPage() {
     <main className="page">
       <div className="page-header">
         <div>
-          <h1>Review</h1>
-          <p>High-risk known intent requiring authorization. Technical unknowns are routed to manual investigation instead.</p>
+          <h1>Review Queue</h1>
+          <p>High-risk actions waiting for a person before execution.</p>
+          <p>
+            Relay understands the proposed action and current state here. Ambiguous outcomes stay in manual
+            investigation instead.
+          </p>
         </div>
       </div>
       <section className="grid">
@@ -21,26 +25,34 @@ export default async function ReviewPage() {
             <h2>{review.claim_id}</h2>
             <p>{review.request_text}</p>
             <div className="fact">
-              <strong>Requested action</strong>
+              <strong>Proposed action</strong>
               <span>
                 {titleize(review.action_type)}{" "}
                 {review.arguments_json.amountCents ? money(review.arguments_json.amountCents) : ""}
               </span>
             </div>
             <div className="fact">
-              <strong>Policy reason</strong>
+              <strong>Why review is required</strong>
               <span>{reviewReason(review.reason_code)}</span>
             </div>
             <div className="fact">
-              <strong>Approve means</strong>
+              <strong>Risk / threshold</strong>
+              <span>{riskThresholdSummary(review)}</span>
+            </div>
+            <div className="fact">
+              <strong>Source state</strong>
+              <span>{sourceStateSummary(review.claim_snapshot_json, review.expected_version_at_plan)}</span>
+            </div>
+            <div className="fact">
+              <strong>Approve</strong>
               <span>Relay revalidates version {review.expected_version_at_plan} before attempting the settlement.</span>
             </div>
             <div className="fact">
-              <strong>Reject means</strong>
+              <strong>Reject</strong>
               <span>No adapter call is made and the run fails closed with an audit event.</span>
             </div>
             <p>
-              Run {shortId(review.run_id)} · planned version {review.expected_version_at_plan}
+              Trace {shortId(review.run_id)} · planned version {review.expected_version_at_plan}
             </p>
             <form action={reviewDecisionAction}>
               <input type="hidden" name="reviewId" value={review.id} />
@@ -72,4 +84,18 @@ function reviewReason(reasonCode: string) {
     return "Settlement issuance is high risk and requires a human reviewer.";
   }
   return titleize(reasonCode);
+}
+
+function riskThresholdSummary(review: {
+  risk_level?: string;
+  arguments_json: { amountCents?: number };
+  policy_snapshot_json?: { thresholdCents?: number };
+}) {
+  const amount = money(review.arguments_json.amountCents);
+  const threshold = money(review.policy_snapshot_json?.thresholdCents);
+  return `${titleize(review.risk_level)} risk · proposed ${amount} · autonomous threshold ${threshold}`;
+}
+
+function sourceStateSummary(snapshot: { status?: string; version?: number; reserveAmountCents?: number }, expectedVersion: number) {
+  return `${titleize(snapshot.status)} claim · version ${snapshot.version ?? expectedVersion} · reserve ${money(snapshot.reserveAmountCents)}`;
 }
