@@ -23,7 +23,7 @@ export class DeterministicPlannerProvider implements PlannerProvider {
 
   async createPlan(input: PlannerInput): Promise<ActionPlanDraft> {
     const text = input.requestText.toLowerCase();
-    if (input.claim.id === "CLM-1042" && text.includes("reserve") && text.includes("inspection")) {
+    if (isRepairClaim(input.claim.id) && text.includes("reserve") && text.includes("inspection")) {
       return {
         kind: "PLAN",
         claimId: input.claim.id,
@@ -66,6 +66,10 @@ export class DeterministicPlannerProvider implements PlannerProvider {
       reason: "The deterministic planner could not map the request to the allowed action catalog."
     };
   }
+}
+
+function isRepairClaim(claimId: string): boolean {
+  return claimId === "CLM-1042" || claimId.startsWith("CLM-1042--");
 }
 
 export class XaiPlannerProvider implements PlannerProvider {

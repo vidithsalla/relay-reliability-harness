@@ -1,12 +1,13 @@
 import Link from "next/link";
 
+import { getOrCreateDemoSessionId } from "@/lib/demo/session";
 import { listRuns } from "@/lib/services/run-service";
 import { shortId, titleize } from "@/lib/ui/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function RunsPage() {
-  const runs = await listRuns();
+  const runs = await listRuns(await getOrCreateDemoSessionId());
   return (
     <main className="page">
       <div className="page-header">
@@ -14,8 +15,8 @@ export default async function RunsPage() {
           <h1>Execution traces</h1>
           <p>Every saved execution, with the evidence Relay used to determine what happened and choose the next safe action.</p>
           <p>
-            Each trace preserves intended action, API result, source-of-record read-back, reconciliation result, recovery
-            decision, and human action where applicable.
+            This view is scoped to your anonymous demo session so eval and screenshot verification runs do not bury the
+            traces you create.
           </p>
         </div>
       </div>

@@ -1,11 +1,12 @@
 import { reviewDecisionAction } from "@/app/actions";
+import { getOrCreateDemoSessionId } from "@/lib/demo/session";
 import { listPendingReviews } from "@/lib/services/run-service";
 import { money, shortId, titleize } from "@/lib/ui/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReviewPage() {
-  const reviews = await listPendingReviews();
+  const reviews = await listPendingReviews(await getOrCreateDemoSessionId());
   return (
     <main className="page">
       <div className="page-header">

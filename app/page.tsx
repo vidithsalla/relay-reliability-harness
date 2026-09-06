@@ -101,7 +101,7 @@ export default function HomePage() {
           <Link className="proof-entry" href="/evals">
             <div className="eval-preview" aria-hidden="true">
               <span>Eval suite</span>
-              <strong>12 / 12</strong>
+              <strong>12</strong>
               <span>deterministic cases</span>
             </div>
             <span className="proof-label">View the evals</span>
@@ -217,7 +217,7 @@ function FeaturedScenario(props: { scenarioId: string; title: string; text: stri
       </div>
       <form action={runScenarioAction}>
         <input type="hidden" name="scenarioId" value={props.scenarioId} />
-        <button className="text-button" type="submit">
+        <button aria-label={`Run ${props.title}`} className="text-button" type="submit">
           Run
         </button>
       </form>

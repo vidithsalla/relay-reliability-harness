@@ -42,4 +42,4 @@ Run these from `/`:
 
 ## Limitations
 
-No real enterprise connector, no Guidewire compatibility claim, no the target company internal claim, prototype actor switching only, no distributed workers, no real settlements/payments, deterministic fixture planner by default, optional Grok provider depends on external credentials.
+No real enterprise connector, no Guidewire compatibility claim, no third-party internal architecture claim, prototype anonymous demo isolation only, no distributed workers, no real settlements/payments, deterministic fixture planner by default, optional Grok provider depends on external credentials.

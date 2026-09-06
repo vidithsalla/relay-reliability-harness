@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
 
 import { runEvalSuite } from "@/lib/eval/eval-suite";
-import { resetClaimFixtures, bumpClaimVersion } from "@/lib/services/seed-service";
-import { createAndStartRun, decideReview, getRunDetail } from "@/lib/services/run-service";
+import { runDemoScenario } from "@/lib/services/demo-scenario-service";
+import { resetDemoClaimFixture, resetClaimFixtures, bumpClaimVersion } from "@/lib/services/seed-service";
+import { createAndStartRun, decideReview, getRunDetail, listPendingReviews, listRuns } from "@/lib/services/run-service";
 
 describe("execution coordinator", () => {
   beforeEach(async () => {
@@ -66,5 +68,47 @@ describe("execution coordinator", () => {
     const result = await runEvalSuite();
     expect(result.failed).toBe(0);
     expect(result.passed).toBe(12);
+  });
+
+  it("isolates concurrent demo sessions that run the same scenarios", async () => {
+    const sessionA = `demo_${randomUUID()}`;
+    const sessionB = `demo_${randomUUID()}`;
+
+    const [runA, runB] = await Promise.all([
+      runDemoScenario("timeout-after-write", sessionA),
+      runDemoScenario("timeout-after-write", sessionB)
+    ]);
+
+    const [detailA, detailB] = await Promise.all([
+      getRunDetail(runA.runId, sessionA),
+      getRunDetail(runB.runId, sessionB)
+    ]);
+
+    expect(detailA?.run.claim_id).not.toBe(detailB?.run.claim_id);
+    expect(detailA?.run.demo_session_id).toBe(sessionA);
+    expect(detailB?.run.demo_session_id).toBe(sessionB);
+    expect(detailA?.finalClaim?.reserveAmountCents).toBe(840000);
+    expect(detailB?.finalClaim?.reserveAmountCents).toBe(840000);
+    expect(await getRunDetail(runA.runId, sessionB)).toBeNull();
+
+    const [runsA, runsB] = await Promise.all([listRuns(sessionA), listRuns(sessionB)]);
+    expect(runsA.map((run) => run.id)).toContain(runA.runId);
+    expect(runsA.map((run) => run.id)).not.toContain(runB.runId);
+    expect(runsB.map((run) => run.id)).toContain(runB.runId);
+    expect(runsB.map((run) => run.id)).not.toContain(runA.runId);
+
+    await Promise.all([resetDemoClaimFixture("CLM-2048", sessionA), resetDemoClaimFixture("CLM-2048", sessionB)]);
+    await Promise.all([runDemoScenario("high-risk-settlement", sessionA), runDemoScenario("high-risk-settlement", sessionB)]);
+    const [reviewsA, reviewsB] = await Promise.all([listPendingReviews(sessionA), listPendingReviews(sessionB)]);
+    expect(reviewsA).toHaveLength(1);
+    expect(reviewsB).toHaveLength(1);
+    await expect(
+      decideReview({
+        reviewId: reviewsA[0].id,
+        decision: "APPROVE",
+        actorId: `reviewer:${sessionB}`,
+        demoSessionId: sessionB
+      })
+    ).rejects.toThrow("Run does not belong to this demo session.");
   });
 });

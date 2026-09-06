@@ -25,6 +25,8 @@ test("homepage explains Relay and launches the strongest demo", async ({ page })
   await expect(proof.getByRole("button", { name: /Run a failure/ })).toBeVisible();
   await expect(proof.getByRole("link", { name: /Inspect a trace/ })).toBeVisible();
   await expect(proof.getByRole("link", { name: /View the evals/ })).toBeVisible();
+  await expect(proof.locator(".eval-preview")).toContainText("12");
+  await expect(proof.locator(".eval-preview")).toContainText("deterministic cases");
   await expect(page.getByRole("heading", { name: "Under the hood" })).toBeVisible();
   await expect(page.getByText("The planner proposes intent. Deterministic software owns execution safety.")).toBeVisible();
   await proof.getByRole("button", { name: /Run a failure/ }).click();
@@ -71,7 +73,7 @@ test("primary navigation keeps home and scenarios separate", async ({ page }) =>
 
 test("happy path scenario launches from scenarios", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Happy path").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Happy path");
   await expect(page.getByRole("heading", { name: /Execution Trace/ })).toBeVisible();
   await expect(page.getByText("Completed").first()).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
@@ -83,11 +85,11 @@ test("timeout-after-write shows transport failure but confirmed business success
     if (message.type() === "error") errors.push(message.text());
   });
   await page.goto("/scenarios");
-  await scenarioCard(page, "Timeout after write").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Timeout after write");
   await expect(page.getByRole("heading", { name: /Execution Trace/ })).toBeVisible();
   await expect(page.getByText("Timeout", { exact: true })).toBeVisible();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
-  await expect(page.getByText("The planner proposed intent.")).toBeVisible();
+  await expect(page.getByText("Relay attempted the enterprise action, read the source of record")).toBeVisible();
   await page.reload();
   await expect(page.getByText("Confirmed Applied").first()).toBeVisible();
   expect(errors).toEqual([]);
@@ -95,7 +97,7 @@ test("timeout-after-write shows transport failure but confirmed business success
 
 test("timeout-before-write proves absence before retrying", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Timeout before write").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Timeout before write");
   await expect(page.getByRole("heading", { name: /Execution Trace/ })).toBeVisible();
   await expect(page.getByText("Retried after absence was proven")).toBeVisible();
   await expect(page.getByText("reserve $5,000 in source of record")).toBeVisible();
@@ -104,7 +106,7 @@ test("timeout-before-write proves absence before retrying", async ({ page }) => 
 
 test("partial completion retries only the missing inspection", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Partial completion").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Partial completion");
   await expect(page.getByRole("heading", { name: /Execution Trace/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Set reserve.*1/ })).toBeVisible();
   await expect(page.getByRole("row", { name: /Schedule inspection.*2/ })).toBeVisible();
@@ -112,14 +114,14 @@ test("partial completion retries only the missing inspection", async ({ page }) 
 
 test("stale version scenario shows replan blocker", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Stale state").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Stale state");
   await expect(page.getByText("Replan Required").first()).toBeVisible();
   await expect(page.getByText("SCHEDULE_INSPECTION -> Version Conflict")).toBeVisible();
 });
 
 test("duplicate request is a no-op idempotent replay", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Duplicate request").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Duplicate request");
   await expect(page.getByText("No Op Duplicate").first()).toBeVisible();
   await expect(page.getByText("No-op duplicate: prior effect reused")).toBeVisible();
   await expect(page.getByText("Idempotent Replay").first()).toBeVisible();
@@ -127,7 +129,7 @@ test("duplicate request is a no-op idempotent replay", async ({ page }) => {
 
 test("retry exhaustion stops in manual investigation", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Retry exhaustion").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Retry exhaustion");
   await expect(page.getByText("Retry limit reached: manual investigation")).toBeVisible();
   await expect(page.getByText("Manual Investigation Required").first()).toBeVisible();
   await expect(page.getByText("Transient Error -> Transient Error -> Transient Error")).toBeVisible();
@@ -135,16 +137,19 @@ test("retry exhaustion stops in manual investigation", async ({ page }) => {
 
 test("ambiguous state requires manual investigation without blind retry", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "Ambiguous outcome").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "Ambiguous outcome");
   await expect(page.getByText("No blind retry: manual investigation")).toBeVisible();
   await expect(page.getByText("Authoritative read-back failed").first()).toBeVisible();
   await expect(page.getByText("Unknown").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Current Source State" })).toBeVisible();
+  await expect(page.getByText("Fetched after the run for operator context.")).toBeVisible();
 });
 
 test("high-risk settlement review approves and persists settlement", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "High-risk settlement").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "High-risk settlement");
   await expect(page.getByText("Waiting Review").first()).toBeVisible();
+  await expect(page.getByText("Relay stopped before execution and routed it for human authorization.")).toBeVisible();
   await page.goto("/review");
   await expect(page.getByRole("heading", { name: "Review Queue" })).toBeVisible();
   await page.getByRole("button", { name: "Approve" }).first().click();
@@ -154,7 +159,7 @@ test("high-risk settlement review approves and persists settlement", async ({ pa
 
 test("reviewer rejection fails closed without an adapter attempt", async ({ page }) => {
   await page.goto("/scenarios");
-  await scenarioCard(page, "High-risk settlement").getByRole("button", { name: "Run scenario" }).click();
+  await runScenario(page, "High-risk settlement");
   await expect(page.getByText("Waiting Review").first()).toBeVisible();
   await page.goto("/review");
   await expect(page.getByRole("heading", { name: "Review Queue" })).toBeVisible();
@@ -162,6 +167,8 @@ test("reviewer rejection fails closed without an adapter attempt", async ({ page
   await expect(page.getByText("Failed Closed").first()).toBeVisible();
   await expect(page.getByText("Rejected").first()).toBeVisible();
   await expect(page.getByText("No adapter call was made.").first()).toBeVisible();
+  await expect(page.getByText("A reviewer rejected it before execution")).toBeVisible();
+  await expect(page.getByText("Relay attempted the enterprise action")).toHaveCount(0);
 });
 
 test("evals page reflects persisted latest eval results", async ({ page }) => {
@@ -172,4 +179,8 @@ test("evals page reflects persisted latest eval results", async ({ page }) => {
 
 function scenarioCard(page: import("@playwright/test").Page, title: string) {
   return page.locator("article").filter({ has: page.getByRole("heading", { name: title }) });
+}
+
+async function runScenario(page: import("@playwright/test").Page, title: string) {
+  await scenarioCard(page, title).getByRole("button", { name: `Run ${title} scenario` }).click();
 }

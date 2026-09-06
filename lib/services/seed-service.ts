@@ -1,4 +1,5 @@
 import { pool } from "@/lib/db/client";
+import { demoClaimId } from "@/lib/demo/ids";
 import type { SeededFaultProfile } from "@/lib/fixtures/fault-profiles";
 
 type ClaimFixture = {
@@ -42,14 +43,21 @@ const claimFixtures: Record<string, ClaimFixture> = {
 };
 
 export async function resetClaimFixtures(claimIds: string[]): Promise<void> {
+  await resetClaimRows(claimIds.map((claimId) => fixtureForClaim(claimId, claimId)));
+}
+
+export async function resetDemoClaimFixture(baseClaimId: string, demoSessionId: string): Promise<string> {
+  const claimId = demoClaimId(baseClaimId, demoSessionId);
+  await resetClaimRows([fixtureForClaim(baseClaimId, claimId)]);
+  return claimId;
+}
+
+async function resetClaimRows(fixtures: ClaimFixture[]): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    for (const claimId of claimIds) {
-      const fixture = claimFixtures[claimId];
-      if (!fixture) {
-        throw new Error(`Unknown fixture claim ${claimId}`);
-      }
+    for (const fixture of fixtures) {
+      const claimId = fixture.id;
       await client.query("DELETE FROM enterprise_idempotency_ledger WHERE claim_id = $1", [claimId]);
       await client.query("DELETE FROM claim_notes WHERE claim_id = $1", [claimId]);
       await client.query("DELETE FROM claim_settlements WHERE claim_id = $1", [claimId]);
@@ -87,6 +95,14 @@ export async function resetClaimFixtures(claimIds: string[]): Promise<void> {
   } finally {
     client.release();
   }
+}
+
+function fixtureForClaim(baseClaimId: string, claimId: string): ClaimFixture {
+  const fixture = claimFixtures[baseClaimId];
+  if (!fixture) {
+    throw new Error(`Unknown fixture claim ${baseClaimId}`);
+  }
+  return { ...fixture, id: claimId };
 }
 
 export async function seedFaultProfiles(profiles: SeededFaultProfile[]): Promise<void> {

@@ -1,11 +1,13 @@
 import { runEvalAction } from "@/app/actions";
 import { latestEvalRun } from "@/lib/eval/eval-suite";
+import { canRunEvalMutation } from "@/lib/eval/permissions";
 import { titleize } from "@/lib/ui/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function EvalsPage() {
   const latest = await latestEvalRun();
+  const evalMutationAllowed = canRunEvalMutation();
   return (
     <main className="page">
       <div className="page-header">
@@ -13,11 +15,15 @@ export default async function EvalsPage() {
           <h1>Reliability evals</h1>
           <p>Deterministic regression cases that verify Relay chooses the expected safe outcome under each failure mode.</p>
         </div>
-        <form action={runEvalAction}>
-          <button className="button" type="submit">
-            Run eval suite
-          </button>
-        </form>
+        {evalMutationAllowed ? (
+          <form action={runEvalAction}>
+            <button className="button" type="submit">
+              Run eval suite
+            </button>
+          </form>
+        ) : (
+          <span className="badge">Read-only hosted demo</span>
+        )}
       </div>
       <section className="panel">
         {latest ? (

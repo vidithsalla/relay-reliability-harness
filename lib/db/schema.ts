@@ -81,6 +81,7 @@ export const workflowRuns = pgTable("workflow_runs", {
   faultProfileId: text("fault_profile_id"),
   status: text("status").notNull(),
   actorId: text("actor_id").notNull(),
+  demoSessionId: text("demo_session_id"),
   startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   ...timestamps

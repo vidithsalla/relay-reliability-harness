@@ -57,7 +57,7 @@ export default function AboutPage() {
         <h2>What Is Simulated</h2>
         <p>
           The included claims workflow is synthetic and provider-agnostic. This repository does not integrate with Guidewire
-          and does not claim to model the target company&apos;s internal systems.
+          and does not claim to model any third-party company&apos;s internal systems.
         </p>
       </section>
       <section className="panel">

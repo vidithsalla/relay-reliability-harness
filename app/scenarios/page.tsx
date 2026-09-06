@@ -33,7 +33,7 @@ export default function ScenariosPage() {
             </div>
             <form action={runScenarioAction}>
               <input type="hidden" name="scenarioId" value={scenario.id} />
-              <button className="button" type="submit">
+              <button aria-label={`Run ${scenario.title} scenario`} className="button" type="submit">
                 Run scenario
               </button>
             </form>

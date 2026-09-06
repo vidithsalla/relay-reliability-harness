@@ -5,8 +5,8 @@ import path from "node:path";
 import { chromium, type Page } from "@playwright/test";
 
 import { runEvalSuite } from "@/lib/eval/eval-suite";
-import { resetClaimFixtures } from "@/lib/services/seed-service";
-import { createAndStartRun } from "@/lib/services/run-service";
+import { createDemoSessionId, DEMO_SESSION_COOKIE } from "@/lib/demo/ids";
+import { runDemoScenario } from "@/lib/services/demo-scenario-service";
 import { pool } from "@/lib/db/client";
 
 const port = 3011;
@@ -15,85 +15,22 @@ const screenshotDir = path.join(process.cwd(), "docs", "screenshots");
 
 async function main() {
   await mkdir(screenshotDir, { recursive: true });
-  await resetClaimFixtures(["CLM-1042", "CLM-2048"]);
-  const timeoutBefore = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "timeout-before-write-reserve",
-    scenarioId: "screenshot-timeout-before"
-  });
-  await resetClaimFixtures(["CLM-1042"]);
-  const timeout = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "timeout-after-write-reserve",
-    scenarioId: "screenshot-timeout-after"
-  });
-  await resetClaimFixtures(["CLM-1042"]);
-  const partial = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "partial-reserve-success-inspection-timeout-before",
-    scenarioId: "screenshot-partial"
-  });
-  await resetClaimFixtures(["CLM-1042"]);
-  const stale = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "stale-version-before-second-action",
-    scenarioId: "screenshot-stale"
-  });
-  await resetClaimFixtures(["CLM-1042"]);
-  await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "none",
-    scenarioId: "screenshot-duplicate-first",
-    logicalRunNamespace: "screenshot-duplicate"
-  });
-  const duplicate = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText:
-      "The repair estimate came back at $8,400. Update the reserve and schedule an inspection with Preferred Body Network.",
-    plannerMode: "deterministic",
-    faultProfileId: "none",
-    scenarioId: "screenshot-duplicate",
-    logicalRunNamespace: "screenshot-duplicate"
-  });
-  await resetClaimFixtures(["CLM-1042"]);
-  const retryExhaustion = await createAndStartRun({
-    claimId: "CLM-1042",
-    requestText: "Schedule another inspection.",
-    plannerMode: "deterministic",
-    faultProfileId: "retry-exhaustion-inspection",
-    scenarioId: "screenshot-retry-exhaustion"
-  });
-  await resetClaimFixtures(["CLM-2048"]);
-  const ambiguous = await createAndStartRun({
-    claimId: "CLM-2048",
-    requestText: "Issue the agreed $9,500 settlement.",
-    plannerMode: "deterministic",
-    faultProfileId: "ambiguous-write-and-readback-timeout",
-    scenarioId: "screenshot-ambiguous"
-  });
-  await resetClaimFixtures(["CLM-2048"]);
-  await createAndStartRun({
-    claimId: "CLM-2048",
-    requestText: "Issue the agreed $42,500 settlement.",
-    plannerMode: "deterministic",
-    faultProfileId: "none",
-    scenarioId: "screenshot-review"
-  });
+  const timeoutBeforeSession = createDemoSessionId();
+  const timeoutSession = createDemoSessionId();
+  const partialSession = createDemoSessionId();
+  const staleSession = createDemoSessionId();
+  const duplicateSession = createDemoSessionId();
+  const retrySession = createDemoSessionId();
+  const ambiguousSession = createDemoSessionId();
+  const reviewSession = createDemoSessionId();
+  const timeoutBefore = await runDemoScenario("timeout-before-write", timeoutBeforeSession);
+  const timeout = await runDemoScenario("timeout-after-write", timeoutSession);
+  const partial = await runDemoScenario("partial-completion", partialSession);
+  const stale = await runDemoScenario("stale-state", staleSession);
+  const duplicate = await runDemoScenario("duplicate-request", duplicateSession);
+  const retryExhaustion = await runDemoScenario("retry-exhaustion", retrySession);
+  const ambiguous = await runDemoScenario("ambiguous-outcome", ambiguousSession);
+  await runDemoScenario("high-risk-settlement", reviewSession);
   await runEvalSuite();
 
   const server = spawn("npx", ["next", "dev", "-p", String(port)], {
@@ -106,14 +43,14 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     await screenshot(page, "/", "00-homepage.png");
     await screenshot(page, "/scenarios", "01-scenario-launcher.png");
-    await screenshot(page, `/runs/${timeout.runId}`, "02-timeout-after-write.png");
-    await screenshot(page, `/runs/${timeoutBefore.runId}`, "03-timeout-before-write.png");
-    await screenshot(page, `/runs/${partial.runId}`, "04-partial-completion.png");
-    await screenshot(page, `/runs/${stale.runId}`, "05-stale-version.png");
-    await screenshot(page, `/runs/${duplicate.runId}`, "06-duplicate-request.png");
-    await screenshot(page, `/runs/${retryExhaustion.runId}`, "07-retry-exhaustion.png");
-    await screenshot(page, `/runs/${ambiguous.runId}`, "08-ambiguous-investigation.png");
-    await screenshot(page, "/review", "09-review-queue.png");
+    await screenshot(page, `/runs/${timeout.runId}`, "02-timeout-after-write.png", timeoutSession);
+    await screenshot(page, `/runs/${timeoutBefore.runId}`, "03-timeout-before-write.png", timeoutBeforeSession);
+    await screenshot(page, `/runs/${partial.runId}`, "04-partial-completion.png", partialSession);
+    await screenshot(page, `/runs/${stale.runId}`, "05-stale-version.png", staleSession);
+    await screenshot(page, `/runs/${duplicate.runId}`, "06-duplicate-request.png", duplicateSession);
+    await screenshot(page, `/runs/${retryExhaustion.runId}`, "07-retry-exhaustion.png", retrySession);
+    await screenshot(page, `/runs/${ambiguous.runId}`, "08-ambiguous-investigation.png", ambiguousSession);
+    await screenshot(page, "/review", "09-review-queue.png", reviewSession);
     await screenshot(page, "/evals", "10-eval-results.png");
     await browser.close();
   } finally {
@@ -122,7 +59,19 @@ async function main() {
   }
 }
 
-async function screenshot(page: Page, url: string, file: string) {
+async function screenshot(page: Page, url: string, file: string, demoSessionId?: string) {
+  if (demoSessionId) {
+    await page.context().addCookies([
+      {
+        name: DEMO_SESSION_COOKIE,
+        value: demoSessionId,
+        domain: "127.0.0.1",
+        path: "/",
+        httpOnly: true,
+        sameSite: "Lax"
+      }
+    ]);
+  }
   await page.goto(`${baseUrl}${url}`, { waitUntil: "networkidle" });
   await page.screenshot({ path: path.join(screenshotDir, file), fullPage: true });
   console.log(`captured docs/screenshots/${file}`);

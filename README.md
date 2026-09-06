@@ -1,8 +1,8 @@
 # Relay
 
-Relay is a production-shaped reliability harness for enterprise agent actions. It injects failures around a synthetic system-of-record adapter, reads authoritative state back after attempted mutations, reconciles intended versus observed effects, and decides whether to complete, retry safely, replan, route to human review, or stop for manual investigation.
+Relay is a production-shaped reliability harness for agent actions against mutable business systems. It injects failures around a synthetic source-of-record adapter, reads state back after attempted mutations, reconciles intended versus observed effects, and decides whether to complete, retry safely, replan, route to human review, or stop for manual investigation.
 
-The included claims workflow is synthetic and provider-agnostic. This repository does not integrate with Guidewire and does not claim to model the target company's internal systems.
+The included claims workflow is synthetic and provider-agnostic. It is not a real insurer integration, not a Guidewire integration, and not affiliated with or based on any third-party company's internal architecture. This repository is proof-of-work quality, not production-ready software.
 
 ## What It Proves
 
@@ -125,7 +125,7 @@ npm run verify:db
 
 - synthetic claims system, not a real enterprise integration;
 - no Guidewire API or schema compatibility claim;
-- no the target company internal architecture claim;
+- no third-party internal architecture claim;
 - narrow four-action catalog;
 - sequential action execution only;
 - deterministic recovery rules, not learned recovery;
@@ -137,3 +137,4 @@ npm run verify:db
 - deterministic planner is fixture-driven;
 - Grok planner requires external xAI credentials and was not live-smoked without a key;
 - app-level trace events, not full production telemetry.
+- anonymous hosted demos isolate synthetic claim state per visitor, but this is still demo isolation rather than enterprise authentication.

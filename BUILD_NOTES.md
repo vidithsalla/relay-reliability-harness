@@ -19,7 +19,7 @@
 
 ## Locked Implementation Decisions
 
-- Use the synthetic claims workflow only as a provider-agnostic source-of-record testbed. No Guidewire names, compatibility claims, or the target company internal claims.
+- Use the synthetic claims workflow only as a provider-agnostic source-of-record testbed. No Guidewire compatibility claim and no third-party internal architecture claim.
 - Keep the core proof centered on `fault injection -> attempted enterprise action -> authoritative read-back -> intent-vs-observed reconciliation -> safe recovery`.
 - Persist the runtime demo path in Postgres; no in-memory fallback for the primary workflow.
 - Execute actions sequentially so version-chain and partial-completion evidence remain legible.

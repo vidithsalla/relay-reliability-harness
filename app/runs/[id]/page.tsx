@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { replayRunAction } from "@/app/actions";
+import { getDemoSessionId } from "@/lib/demo/session";
 import { getRunDetail } from "@/lib/services/run-service";
 import { money, shortId, titleize } from "@/lib/ui/format";
 
@@ -15,7 +16,7 @@ type ClaimUiState = {
 
 export default async function RunDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const detail = await getRunDetail(id);
+  const detail = await getRunDetail(id, await getDemoSessionId());
   if (!detail) notFound();
 
   const highlightedAction = selectHighlightedAction(detail);
@@ -39,6 +40,16 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
   const highlightedReadbackState =
     highlightedReadback?.read_status === "SUCCESS" ? (highlightedReadback.state_json as ClaimUiState) : null;
   const highlightedActionRejected = highlightedAction?.status === "REJECTED";
+  const hasReviewBlock = detail.run.status === "WAITING_REVIEW" || detail.reviews.some((review) => review.status === "PENDING");
+  const hasRejectedReview = detail.actions.some((action) => action.status === "REJECTED");
+  const sourceStateLabel =
+    detail.finalClaimSource === "DECISION_TIME_EVIDENCE"
+      ? "Decision-Time Source Evidence"
+      : "Current Source State";
+  const sourceStateNote =
+    detail.finalClaimSource === "DECISION_TIME_EVIDENCE"
+      ? "Shown from a successful post-attempt read-back captured during this run."
+      : "Fetched after the run for operator context. This was not available when Relay selected recovery.";
   const operatorDecision = operatorDecisionFor(
     detail.run.status,
     highlightedReconciliation?.status,
@@ -75,7 +86,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
             ["PLAN", detail.plan ? "typed" : "blocked"],
             ["POLICY", detail.actions.some((action) => action.status === "WAITING_REVIEW") ? "review" : "checked"],
             ["EXECUTE", detail.attempts.length ? "attempted" : "not run"],
-            ["READ BACK", postSnapshots.length ? "observed" : "pending"],
+            ["READ BACK", readbackStageState(postSnapshots)],
             ["RECONCILE", detail.reconciliations.length ? "classified" : "pending"],
             ["RECOVER", lastRecovery ? titleize(lastRecovery.decision) : "pending"],
             ["HUMAN", humanStage(detail.events)]
@@ -92,10 +103,7 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
         <div className="proof-header">
           <div>
             <h2>Intent vs Observed Proof</h2>
-            <p>
-              The planner proposed intent. Relay attempted the enterprise action, read the source of record, reconciled the
-              mismatch, and selected a safe recovery path.
-            </p>
+            <p>{proofIntroCopy(detail.run.status, detail.attempts.length, hasReviewBlock, hasRejectedReview)}</p>
           </div>
           <div className="retry-verdict">
             <span className={`badge status-${highlightedReconciliation?.status ?? detail.run.status}`}>
@@ -227,7 +235,8 @@ export default async function RunDetailPage({ params }: { params: Promise<{ id: 
       </section>
 
       <section className="panel">
-        <h2>Source-of-Record State</h2>
+        <h2>{sourceStateLabel}</h2>
+        <p>{sourceStateNote}</p>
         <div className="state-grid">
           <div className="fact">
             <strong>Claim</strong>
@@ -323,6 +332,22 @@ function ProofStep(props: { number: string; label: string; value: string; note: 
       <p>{props.note}</p>
     </div>
   );
+}
+
+function proofIntroCopy(status: string, attemptCount: number, hasReviewBlock: boolean, hasRejectedReview: boolean) {
+  if (hasRejectedReview) {
+    return "The planner proposed a high-risk action. A reviewer rejected it before execution, so Relay made no adapter call and recorded the fail-closed decision.";
+  }
+  if (hasReviewBlock || status === "WAITING_REVIEW") {
+    return "The planner proposed a high-risk action. Relay stopped before execution and routed it for human authorization.";
+  }
+  if (attemptCount === 0) {
+    return "The planner proposed intent. Relay stopped before adapter execution, so there is no API result, post-action read-back, or reconciliation yet.";
+  }
+  if (status === "MANUAL_INVESTIGATION") {
+    return "Relay attempted the enterprise action, but decision-time evidence was not enough to prove whether the effect did or did not happen.";
+  }
+  return "Relay attempted the enterprise action, read the source of record, reconciled intended state against observed state, and selected the safe recovery path.";
 }
 
 function actionSummary(action: { action_type: string; arguments_json: Record<string, unknown> }) {
@@ -483,6 +508,12 @@ function readbackLabel(
   return actionSnapshots
     .map((snapshot) => (snapshot.read_status === "SUCCESS" ? `success v${snapshot.claim_version ?? "n/a"}` : "failed"))
     .join(" -> ");
+}
+
+function readbackStageState(snapshots: Array<{ read_status: string }>) {
+  if (!snapshots.length) return "pending";
+  if (snapshots.some((snapshot) => snapshot.read_status === "FAILED")) return "failed";
+  return "observed";
 }
 
 function eventCategory(eventType: string) {

@@ -66,6 +66,7 @@ CREATE TABLE IF NOT EXISTS workflow_runs (
   fault_profile_id text,
   status text NOT NULL,
   actor_id text NOT NULL,
+  demo_session_id text,
   started_at timestamptz NOT NULL DEFAULT now(),
   completed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()

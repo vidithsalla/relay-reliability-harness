@@ -44,6 +44,7 @@ type CreateRunInput = {
   replayOfRunId?: string | null;
   logicalRunNamespace?: string;
   autoApproveHighRisk?: boolean;
+  demoSessionId?: string | null;
 };
 
 type DbActionRow = {
@@ -68,9 +69,9 @@ export async function createAndStartRun(input: CreateRunInput): Promise<{ runId:
   await pool.query(
     `
       INSERT INTO workflow_runs (
-        id, scenario_id, replay_of_run_id, claim_id, request_text, planner_mode, fault_profile_id, status, actor_id
+        id, scenario_id, replay_of_run_id, claim_id, request_text, planner_mode, fault_profile_id, status, actor_id, demo_session_id
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, 'PLANNING', $8)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, 'PLANNING', $8, $9)
     `,
     [
       runId,
@@ -80,7 +81,8 @@ export async function createAndStartRun(input: CreateRunInput): Promise<{ runId:
       input.requestText,
       plannerMode,
       faultProfile.id,
-      input.actorId ?? "operator"
+      input.actorId ?? "operator",
+      input.demoSessionId ?? null
     ]
   );
   await trace(runId, null, null, "RUN_CREATED", "INFO", "Run created.", {
@@ -359,6 +361,7 @@ export async function decideReview(input: {
   decision: "APPROVE" | "REJECT";
   note?: string;
   actorId: string;
+  demoSessionId?: string | null;
 }): Promise<{ runId: string; status: RunStatus }> {
   if (!canActorReview(input.actorId)) {
     throw new Error("Reviewer role required.");
@@ -375,6 +378,7 @@ export async function decideReview(input: {
     throw new Error("Review request is not pending.");
   }
   const run = await getRunRow(review.run_id);
+  assertDemoSessionAccess(run.demo_session_id, input.demoSessionId);
   const action = (await getActionsForRun(review.run_id)).find((item) => item.id === review.planned_action_id);
   if (!action) {
     throw new Error("Planned action for review not found.");
@@ -418,8 +422,9 @@ export async function decideReview(input: {
   return executeRun(review.run_id);
 }
 
-export async function replayRun(runId: string): Promise<{ runId: string; status: RunStatus }> {
+export async function replayRun(runId: string, demoSessionId?: string | null): Promise<{ runId: string; status: RunStatus }> {
   const run = await getRunRow(runId);
+  assertDemoSessionAccess(run.demo_session_id, demoSessionId);
   return createAndStartRun({
     claimId: run.claim_id,
     requestText: run.request_text,
@@ -427,13 +432,15 @@ export async function replayRun(runId: string): Promise<{ runId: string; status:
     faultProfileId: run.fault_profile_id,
     scenarioId: run.scenario_id,
     actorId: run.actor_id,
-    replayOfRunId: runId
+    replayOfRunId: runId,
+    demoSessionId: run.demo_session_id
   });
 }
 
-export async function getRunDetail(runId: string) {
+export async function getRunDetail(runId: string, demoSessionId?: string | null) {
   const run = (await pool.query("SELECT * FROM workflow_runs WHERE id = $1", [runId])).rows[0];
   if (!run) return null;
+  if (!canAccessRun(run.demo_session_id, demoSessionId)) return null;
   const plan = (await pool.query("SELECT * FROM action_plans WHERE run_id = $1", [runId])).rows[0] ?? null;
   const actions = plan
     ? (await pool.query("SELECT * FROM planned_actions WHERE plan_id = $1 ORDER BY ordinal", [plan.id])).rows
@@ -457,10 +464,16 @@ export async function getRunDetail(runId: string) {
   } catch {
     finalClaim = null;
   }
-  return { run, plan, actions, attempts, reconciliations, recoveries, snapshots, reviews, events, finalClaim };
+  const finalClaimSource = latestSuccessfulPostSnapshot ? "DECISION_TIME_EVIDENCE" : "CURRENT_SOURCE_STATE";
+  return { run, plan, actions, attempts, reconciliations, recoveries, snapshots, reviews, events, finalClaim, finalClaimSource };
 }
 
-export async function listRuns() {
+export async function listRuns(demoSessionId?: string | null) {
+  const values: unknown[] = [];
+  const scopeWhere = demoSessionId
+    ? "WHERE wr.demo_session_id = $1"
+    : "WHERE wr.demo_session_id IS NULL AND COALESCE(wr.scenario_id, '') NOT LIKE 'screenshot-%' AND COALESCE(wr.scenario_id, '') NOT LIKE 'eval-%'";
+  if (demoSessionId) values.push(demoSessionId);
   const result = await pool.query(`
     SELECT
       wr.*,
@@ -469,21 +482,26 @@ export async function listRuns() {
       (SELECT reason_summary FROM recovery_decisions rd WHERE rd.run_id = wr.id ORDER BY rd.created_at DESC LIMIT 1) AS blocker
     FROM workflow_runs wr
     LEFT JOIN fault_profiles fp ON fp.id = wr.fault_profile_id
+    ${scopeWhere}
     ORDER BY wr.created_at DESC
     LIMIT 50
-  `);
+  `, values);
   return result.rows;
 }
 
-export async function listPendingReviews() {
+export async function listPendingReviews(demoSessionId?: string | null) {
+  const values: unknown[] = [];
+  const scopeWhere = demoSessionId ? "AND wr.demo_session_id = $1" : "AND wr.demo_session_id IS NULL";
+  if (demoSessionId) values.push(demoSessionId);
   const result = await pool.query(`
     SELECT rr.*, wr.claim_id, wr.request_text, pa.action_type, pa.arguments_json, pa.risk_level, pa.expected_version_at_plan
     FROM review_requests rr
     JOIN workflow_runs wr ON wr.id = rr.run_id
     JOIN planned_actions pa ON pa.id = rr.planned_action_id
     WHERE rr.status = 'PENDING'
+    ${scopeWhere}
     ORDER BY rr.requested_at ASC
-  `);
+  `, values);
   return result.rows;
 }
 
@@ -521,10 +539,22 @@ async function getRunRow(runId: string) {
     fault_profile_id: string | null;
     scenario_id: string | null;
     actor_id: string;
+    demo_session_id: string | null;
   }>("SELECT * FROM workflow_runs WHERE id = $1", [runId]);
   const row = result.rows[0];
   if (!row) throw new Error(`Run ${runId} not found`);
   return row;
+}
+
+function canAccessRun(runDemoSessionId: string | null, requestedDemoSessionId?: string | null): boolean {
+  if (!runDemoSessionId) return true;
+  return runDemoSessionId === requestedDemoSessionId;
+}
+
+function assertDemoSessionAccess(runDemoSessionId: string | null, requestedDemoSessionId?: string | null) {
+  if (!canAccessRun(runDemoSessionId, requestedDemoSessionId)) {
+    throw new Error("Run does not belong to this demo session.");
+  }
 }
 
 async function getActionsForRun(runId: string): Promise<PlannedActionRecord[]> {
