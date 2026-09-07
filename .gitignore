@@ -14,3 +14,5 @@ docker-data/
 .gstack/
 Relay_Spec/
 FINAL_READINESS_REPORT.md
+.vercel
+.env*
