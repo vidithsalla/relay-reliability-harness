@@ -4,6 +4,8 @@ Relay is a production-shaped reliability harness for agent actions against mutab
 
 The included claims workflow is synthetic and provider-agnostic. It is not a real insurer integration, not a Guidewire integration, and not affiliated with or based on any third-party company's internal architecture. This repository is proof-of-work quality, not production-ready software.
 
+**Live demo:** [Open Relay](https://relay-reliability-harness.vercel.app) · **Screenshots:** `docs/screenshots`
+
 ## What It Proves
 
 Relay keeps five facts separate:
